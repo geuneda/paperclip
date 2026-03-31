@@ -49,11 +49,11 @@ export async function doctor(opts: {
     config = readConfig(opts.config)!;
   } catch (err) {
     const readResult: CheckResult = {
-      name: "Config file",
+      name: "설정 파일",
       status: "fail",
-      message: `Could not read config: ${err instanceof Error ? err.message : String(err)}`,
+      message: `설정을 읽을 수 없습니다: ${err instanceof Error ? err.message : String(err)}`,
       canRepair: false,
-      repairHint: "Run `paperclipai configure --section database` or `paperclipai onboard`",
+      repairHint: "`paperclipai configure --section database` 또는 `paperclipai onboard`를 실행하세요",
     };
     results.push(readResult);
     printResult(readResult);
@@ -142,7 +142,7 @@ async function maybeRepair(
   let shouldRepair = opts.yes;
   if (!shouldRepair) {
     const answer = await p.confirm({
-      message: `Repair "${result.name}"?`,
+      message: `"${result.name}"을(를) 수리하시겠습니까?`,
       initialValue: true,
     });
     if (p.isCancel(answer)) return false;
@@ -152,10 +152,10 @@ async function maybeRepair(
   if (shouldRepair) {
     try {
       await result.repair();
-      p.log.success(`Repaired: ${result.name}`);
+      p.log.success(`수리 완료: ${result.name}`);
       return true;
     } catch (err) {
-      p.log.error(`Repair failed: ${err instanceof Error ? err.message : String(err)}`);
+      p.log.error(`수리 실패: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
   return false;
@@ -185,18 +185,18 @@ function printSummary(results: CheckResult[]): { passed: number; warned: number;
   const failed = results.filter((r) => r.status === "fail").length;
 
   const parts: string[] = [];
-  parts.push(pc.green(`${passed} passed`));
-  if (warned) parts.push(pc.yellow(`${warned} warnings`));
-  if (failed) parts.push(pc.red(`${failed} failed`));
+  parts.push(pc.green(`${passed}개 통과`));
+  if (warned) parts.push(pc.yellow(`${warned}개 경고`));
+  if (failed) parts.push(pc.red(`${failed}개 실패`));
 
-  p.note(parts.join(", "), "Summary");
+  p.note(parts.join(", "), "요약");
 
   if (failed > 0) {
-    p.outro(pc.red("Some checks failed. Fix the issues above and re-run doctor."));
+    p.outro(pc.red("일부 검사가 실패했습니다. 위의 문제를 수정하고 doctor를 다시 실행하세요."));
   } else if (warned > 0) {
-    p.outro(pc.yellow("All critical checks passed with some warnings."));
+    p.outro(pc.yellow("모든 중요 검사가 통과했지만 일부 경고가 있습니다."));
   } else {
-    p.outro(pc.green("All checks passed!"));
+    p.outro(pc.green("모든 검사를 통과했습니다!"));
   }
 
   return { passed, warned, failed };

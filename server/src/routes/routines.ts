@@ -24,7 +24,7 @@ export function routineRoutes(db: Db) {
     if (req.actor.source === "local_implicit" || req.actor.isInstanceAdmin) return;
     const allowed = await access.canUser(companyId, req.actor.userId, "tasks:assign");
     if (!allowed) {
-      throw forbidden("Missing permission: tasks:assign");
+      throw forbidden("권한 부족: tasks:assign");
     }
   }
 
@@ -33,7 +33,7 @@ export function routineRoutes(db: Db) {
     if (req.actor.type === "board") return;
     if (req.actor.type !== "agent" || !req.actor.agentId) throw unauthorized();
     if (assigneeAgentId && assigneeAgentId !== req.actor.agentId) {
-      throw forbidden("Agents can only manage routines assigned to themselves");
+      throw forbidden("Agent는 자신에게 할당된 Routine만 관리할 수 있습니다");
     }
   }
 
@@ -44,7 +44,7 @@ export function routineRoutes(db: Db) {
     if (req.actor.type === "board") return routine;
     if (req.actor.type !== "agent" || !req.actor.agentId) throw unauthorized();
     if (routine.assigneeAgentId !== req.actor.agentId) {
-      throw forbidden("Agents can only manage routines assigned to themselves");
+      throw forbidden("Agent는 자신에게 할당된 Routine만 관리할 수 있습니다");
     }
     return routine;
   }
@@ -82,7 +82,7 @@ export function routineRoutes(db: Db) {
   router.get("/routines/:id", async (req, res) => {
     const detail = await svc.getDetail(req.params.id as string);
     if (!detail) {
-      res.status(404).json({ error: "Routine not found" });
+      res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, detail.companyId);
@@ -92,7 +92,7 @@ export function routineRoutes(db: Db) {
   router.patch("/routines/:id", validate(updateRoutineSchema), async (req, res) => {
     const routine = await assertCanManageExistingRoutine(req, req.params.id as string);
     if (!routine) {
-      res.status(404).json({ error: "Routine not found" });
+      res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
       return;
     }
     const assigneeWillChange =
@@ -109,7 +109,7 @@ export function routineRoutes(db: Db) {
       await assertBoardCanAssignTasks(req, routine.companyId);
     }
     if (req.actor.type === "agent" && req.body.assigneeAgentId && req.body.assigneeAgentId !== req.actor.agentId) {
-      throw forbidden("Agents can only assign routines to themselves");
+      throw forbidden("Agent는 Routine을 자기 자신에게만 할당할 수 있습니다");
     }
     const updated = await svc.update(routine.id, req.body, {
       agentId: req.actor.type === "agent" ? req.actor.agentId : null,
@@ -133,7 +133,7 @@ export function routineRoutes(db: Db) {
   router.get("/routines/:id/runs", async (req, res) => {
     const routine = await svc.get(req.params.id as string);
     if (!routine) {
-      res.status(404).json({ error: "Routine not found" });
+      res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, routine.companyId);
@@ -145,7 +145,7 @@ export function routineRoutes(db: Db) {
   router.post("/routines/:id/triggers", validate(createRoutineTriggerSchema), async (req, res) => {
     const routine = await assertCanManageExistingRoutine(req, req.params.id as string);
     if (!routine) {
-      res.status(404).json({ error: "Routine not found" });
+      res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
       return;
     }
     await assertBoardCanAssignTasks(req, routine.companyId);
@@ -171,12 +171,12 @@ export function routineRoutes(db: Db) {
   router.patch("/routine-triggers/:id", validate(updateRoutineTriggerSchema), async (req, res) => {
     const trigger = await svc.getTrigger(req.params.id as string);
     if (!trigger) {
-      res.status(404).json({ error: "Routine trigger not found" });
+      res.status(404).json({ error: "Routine 트리거를 찾을 수 없습니다" });
       return;
     }
     const routine = await assertCanManageExistingRoutine(req, trigger.routineId);
     if (!routine) {
-      res.status(404).json({ error: "Routine not found" });
+      res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
       return;
     }
     await assertBoardCanAssignTasks(req, routine.companyId);
@@ -202,12 +202,12 @@ export function routineRoutes(db: Db) {
   router.delete("/routine-triggers/:id", async (req, res) => {
     const trigger = await svc.getTrigger(req.params.id as string);
     if (!trigger) {
-      res.status(404).json({ error: "Routine trigger not found" });
+      res.status(404).json({ error: "Routine 트리거를 찾을 수 없습니다" });
       return;
     }
     const routine = await assertCanManageExistingRoutine(req, trigger.routineId);
     if (!routine) {
-      res.status(404).json({ error: "Routine not found" });
+      res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
       return;
     }
     await svc.deleteTrigger(trigger.id);
@@ -232,12 +232,12 @@ export function routineRoutes(db: Db) {
     async (req, res) => {
       const trigger = await svc.getTrigger(req.params.id as string);
       if (!trigger) {
-        res.status(404).json({ error: "Routine trigger not found" });
+        res.status(404).json({ error: "Routine 트리거를 찾을 수 없습니다" });
         return;
       }
       const routine = await assertCanManageExistingRoutine(req, trigger.routineId);
       if (!routine) {
-        res.status(404).json({ error: "Routine not found" });
+        res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
         return;
       }
       const rotated = await svc.rotateTriggerSecret(trigger.id, {
@@ -263,7 +263,7 @@ export function routineRoutes(db: Db) {
   router.post("/routines/:id/run", validate(runRoutineSchema), async (req, res) => {
     const routine = await assertCanManageExistingRoutine(req, req.params.id as string);
     if (!routine) {
-      res.status(404).json({ error: "Routine not found" });
+      res.status(404).json({ error: "Routine을 찾을 수 없습니다" });
       return;
     }
     await assertBoardCanAssignTasks(req, routine.companyId);

@@ -58,7 +58,7 @@ export function activityRoutes(db: Db) {
     const rawId = req.params.id as string;
     const issue = await resolveIssueByRef(rawId);
     if (!issue) {
-      res.status(404).json({ error: "Issue not found" });
+      res.status(404).json({ error: "Issue를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, issue.companyId);
@@ -70,7 +70,7 @@ export function activityRoutes(db: Db) {
     const rawId = req.params.id as string;
     const issue = await resolveIssueByRef(rawId);
     if (!issue) {
-      res.status(404).json({ error: "Issue not found" });
+      res.status(404).json({ error: "Issue를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, issue.companyId);

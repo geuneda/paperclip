@@ -74,21 +74,21 @@ function OverviewContent({
         onSave={(description) => onUpdate({ description })}
         as="p"
         className="text-sm text-muted-foreground"
-        placeholder="Add a description..."
+        placeholder="설명 추가..."
         multiline
         imageUploadHandler={imageUploadHandler}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
         <div>
-          <span className="text-muted-foreground">Status</span>
+          <span className="text-muted-foreground">상태</span>
           <div className="mt-1">
             <StatusBadge status={project.status} />
           </div>
         </div>
         {project.targetDate && (
           <div>
-            <span className="text-muted-foreground">Target Date</span>
+            <span className="text-muted-foreground">목표 일자</span>
             <p>{project.targetDate}</p>
           </div>
         )}
@@ -126,7 +126,7 @@ function ColorPicker({
         onClick={() => setOpen(!open)}
         className="shrink-0 h-5 w-5 rounded-md cursor-pointer hover:ring-2 hover:ring-foreground/20 transition-[box-shadow]"
         style={{ backgroundColor: currentColor }}
-        aria-label="Change project color"
+        aria-label="Project 색상 변경"
       />
       {open && (
         <div className="absolute top-full left-0 mt-2 p-2 bg-popover border border-border rounded-lg shadow-lg z-50 w-max">
@@ -249,7 +249,7 @@ function ProjectWorkspacesContent({
   });
 
   if (summaries.length === 0) {
-    return <p className="text-sm text-muted-foreground">No non-default workspace activity yet.</p>;
+    return <p className="text-sm text-muted-foreground">아직 기본이 아닌 Workspace 활동이 없습니다.</p>;
   }
 
   const activeSummaries = summaries.filter((summary) => summary.executionWorkspaceStatus !== "cleanup_failed");
@@ -280,10 +280,10 @@ function ProjectWorkspacesContent({
             <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <GitBranch className="h-3.5 w-3.5" />
-                <span className="font-mono">{summary.branchName ?? "No branch info"}</span>
+                <span className="font-mono">{summary.branchName ?? "브랜치 정보 없음"}</span>
               </span>
               <span className="rounded-full border border-border px-2 py-0.5 text-[11px]">
-                {summary.runningServiceCount}/{summary.serviceCount} services running
+                {summary.runningServiceCount}/{summary.serviceCount} 서비스 실행 중
               </span>
               {summary.executionWorkspaceStatus ? (
                 <span className="rounded-full border border-border px-2 py-0.5 text-[11px]">
@@ -333,7 +333,7 @@ function ProjectWorkspacesContent({
               ))}
               {hiddenIssueCount > 0 ? (
                 <span className="inline-flex items-center rounded-md border border-dashed border-border px-2.5 py-1.5 text-xs text-muted-foreground">
-                  ... and {hiddenIssueCount} more
+                  ... 그 외 {hiddenIssueCount}개
                 </span>
               ) : null}
             </div>
@@ -344,7 +344,7 @@ function ProjectWorkspacesContent({
               to={workspaceHref}
               className="text-xs font-medium text-foreground hover:underline"
             >
-              {summary.kind === "project_workspace" ? "Configure workspace" : "View workspace"}
+              {summary.kind === "project_workspace" ? "Workspace 설정" : "Workspace 보기"}
             </Link>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -393,7 +393,7 @@ function ProjectWorkspacesContent({
                   status: summary.executionWorkspaceStatus!,
                 })}
               >
-                {summary.executionWorkspaceStatus === "cleanup_failed" ? "Retry close" : "Close workspace"}
+                {summary.executionWorkspaceStatus === "cleanup_failed" ? "닫기 재시도" : "Workspace 닫기"}
               </Button>
             ) : null}
             <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
@@ -415,7 +415,7 @@ function ProjectWorkspacesContent({
         {cleanupFailedSummaries.length > 0 ? (
           <div className="space-y-2">
             <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Cleanup attention needed
+              정리 작업 필요
             </div>
             <div className="overflow-hidden rounded-xl border border-amber-500/20 bg-amber-500/5">
               {cleanupFailedSummaries.map(renderSummaryRow)}
@@ -571,15 +571,15 @@ export function ProjectDetail() {
       invalidateProject();
       const name = updatedProject?.name ?? project?.name ?? "Project";
       if (archived) {
-        pushToast({ title: `"${name}" has been archived`, tone: "success" });
+        pushToast({ title: `"${name}"이(가) 아카이브되었습니다`, tone: "success" });
         navigate("/dashboard");
       } else {
-        pushToast({ title: `"${name}" has been unarchived`, tone: "success" });
+        pushToast({ title: `"${name}"의 아카이브가 해제되었습니다`, tone: "success" });
       }
     },
     onError: (_, archived) => {
       pushToast({
-        title: archived ? "Failed to archive project" : "Failed to unarchive project",
+        title: archived ? "Project 아카이브에 실패했습니다" : "Project 아카이브 해제에 실패했습니다",
         tone: "error",
       });
     },
@@ -816,7 +816,7 @@ export function ProjectDetail() {
           {project.pauseReason === "budget" ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-red-200">
               <span className="h-2 w-2 rounded-full bg-red-400" />
-              Paused by budget hard stop
+              Budget 한도로 일시정지됨
             </div>
           ) : null}
         </div>
@@ -856,10 +856,10 @@ export function ProjectDetail() {
       <Tabs value={activeTab ?? "list"} onValueChange={(value) => handleTabChange(value as ProjectTab)}>
         <PageTabBar
           items={[
-            { value: "list", label: "Issues" },
-            { value: "overview", label: "Overview" },
-            ...(showWorkspacesTab ? [{ value: "workspaces", label: "Workspaces" }] : []),
-            { value: "configuration", label: "Configuration" },
+            { value: "list", label: "Issue" },
+            { value: "overview", label: "개요" },
+            ...(showWorkspacesTab ? [{ value: "workspaces", label: "Workspace" }] : []),
+            { value: "configuration", label: "설정" },
             { value: "budget", label: "Budget" },
             ...pluginTabItems.map((item) => ({
               value: item.value,
@@ -900,7 +900,7 @@ export function ProjectDetail() {
             />
           )
         ) : (
-          <p className="text-sm text-muted-foreground">Loading workspaces...</p>
+          <p className="text-sm text-muted-foreground">Workspace 불러오는 중...</p>
         )
       ) : null}
 

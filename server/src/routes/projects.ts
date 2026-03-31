@@ -40,7 +40,7 @@ export function projectRoutes(db: Db) {
     if (!companyId) return rawId;
     const resolved = await svc.resolveByReference(companyId, rawId);
     if (resolved.ambiguous) {
-      throw conflict("Project shortname is ambiguous in this company. Use the project ID.");
+      throw conflict("이 회사에서 Project 약칭이 중복됩니다. Project ID를 사용하세요.");
     }
     return resolved.project?.id ?? rawId;
   }
@@ -65,7 +65,7 @@ export function projectRoutes(db: Db) {
     const id = req.params.id as string;
     const project = await svc.getById(id);
     if (!project) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, project.companyId);
@@ -86,7 +86,7 @@ export function projectRoutes(db: Db) {
       const createdWorkspace = await svc.createWorkspace(project.id, workspace);
       if (!createdWorkspace) {
         await svc.remove(project.id);
-        res.status(422).json({ error: "Invalid project workspace payload" });
+        res.status(422).json({ error: "잘못된 Project Workspace 데이터입니다" });
         return;
       }
       createdWorkspaceId = createdWorkspace.id;
@@ -114,7 +114,7 @@ export function projectRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
@@ -124,7 +124,7 @@ export function projectRoutes(db: Db) {
     }
     const project = await svc.update(id, body);
     if (!project) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
 
@@ -147,7 +147,7 @@ export function projectRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
@@ -159,13 +159,13 @@ export function projectRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
     const workspace = await svc.createWorkspace(id, req.body);
     if (!workspace) {
-      res.status(422).json({ error: "Invalid project workspace payload" });
+      res.status(422).json({ error: "잘못된 Project Workspace 데이터입니다" });
       return;
     }
 
@@ -197,18 +197,18 @@ export function projectRoutes(db: Db) {
       const workspaceId = req.params.workspaceId as string;
       const existing = await svc.getById(id);
       if (!existing) {
-        res.status(404).json({ error: "Project not found" });
+        res.status(404).json({ error: "Project를 찾을 수 없습니다" });
         return;
       }
       assertCompanyAccess(req, existing.companyId);
       const workspaceExists = (await svc.listWorkspaces(id)).some((workspace) => workspace.id === workspaceId);
       if (!workspaceExists) {
-        res.status(404).json({ error: "Project workspace not found" });
+        res.status(404).json({ error: "Project Workspace를 찾을 수 없습니다" });
         return;
       }
       const workspace = await svc.updateWorkspace(id, workspaceId, req.body);
       if (!workspace) {
-        res.status(422).json({ error: "Invalid project workspace payload" });
+        res.status(422).json({ error: "잘못된 Project Workspace 데이터입니다" });
         return;
       }
 
@@ -236,32 +236,32 @@ export function projectRoutes(db: Db) {
     const workspaceId = req.params.workspaceId as string;
     const action = String(req.params.action ?? "").trim().toLowerCase();
     if (action !== "start" && action !== "stop" && action !== "restart") {
-      res.status(404).json({ error: "Runtime service action not found" });
+      res.status(404).json({ error: "런타임 서비스 작업을 찾을 수 없습니다" });
       return;
     }
 
     const project = await svc.getById(id);
     if (!project) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, project.companyId);
 
     const workspace = project.workspaces.find((entry) => entry.id === workspaceId) ?? null;
     if (!workspace) {
-      res.status(404).json({ error: "Project workspace not found" });
+      res.status(404).json({ error: "Project Workspace를 찾을 수 없습니다" });
       return;
     }
 
     const workspaceCwd = workspace.cwd;
     if (!workspaceCwd) {
-      res.status(422).json({ error: "Project workspace needs a local path before Paperclip can manage local runtime services" });
+      res.status(422).json({ error: "로컬 런타임 서비스를 관리하려면 Project Workspace에 로컬 경로가 필요합니다" });
       return;
     }
 
     const runtimeConfig = workspace.runtimeConfig?.workspaceRuntime ?? null;
     if ((action === "start" || action === "restart") && !runtimeConfig) {
-      res.status(422).json({ error: "Project workspace has no runtime service configuration" });
+      res.status(422).json({ error: "Project Workspace에 런타임 서비스 설정이 없습니다" });
       return;
     }
 
@@ -375,13 +375,13 @@ export function projectRoutes(db: Db) {
     const workspaceId = req.params.workspaceId as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
     const workspace = await svc.removeWorkspace(id, workspaceId);
     if (!workspace) {
-      res.status(404).json({ error: "Project workspace not found" });
+      res.status(404).json({ error: "Project Workspace를 찾을 수 없습니다" });
       return;
     }
 
@@ -407,13 +407,13 @@ export function projectRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
     const project = await svc.remove(id);
     if (!project) {
-      res.status(404).json({ error: "Project not found" });
+      res.status(404).json({ error: "Project를 찾을 수 없습니다" });
       return;
     }
 

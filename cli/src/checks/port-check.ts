@@ -8,17 +8,17 @@ export async function portCheck(config: PaperclipConfig): Promise<CheckResult> {
 
   if (result.available) {
     return {
-      name: "Server port",
+      name: "서버 포트",
       status: "pass",
-      message: `Port ${port} is available`,
+      message: `포트 ${port}을 사용할 수 있습니다`,
     };
   }
 
   return {
-    name: "Server port",
+    name: "서버 포트",
     status: "warn",
-    message: result.error ?? `Port ${port} is not available`,
+    message: result.error ?? `포트 ${port}을 사용할 수 없습니다`,
     canRepair: false,
-    repairHint: `Check what's using port ${port} with: lsof -i :${port}`,
+    repairHint: `포트 ${port}을 사용 중인 프로세스 확인: lsof -i :${port}`,
   };
 }

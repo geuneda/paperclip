@@ -9,9 +9,9 @@ export async function databaseCheck(config: PaperclipConfig, configPath?: string
       return {
         name: "Database",
         status: "fail",
-        message: "PostgreSQL mode selected but no connection string configured",
+        message: "PostgreSQL 모드가 선택되었지만 연결 문자열이 설정되지 않았습니다",
         canRepair: false,
-        repairHint: "Run `paperclipai configure --section database`",
+        repairHint: "`paperclipai configure --section database`를 실행하세요",
       };
     }
 
@@ -22,15 +22,15 @@ export async function databaseCheck(config: PaperclipConfig, configPath?: string
       return {
         name: "Database",
         status: "pass",
-        message: "PostgreSQL connection successful",
+        message: "PostgreSQL 연결 성공",
       };
     } catch (err) {
       return {
         name: "Database",
         status: "fail",
-        message: `Cannot connect to PostgreSQL: ${err instanceof Error ? err.message : String(err)}`,
+        message: `PostgreSQL에 연결할 수 없습니다: ${err instanceof Error ? err.message : String(err)}`,
         canRepair: false,
-        repairHint: "Check your connection string and ensure PostgreSQL is running",
+        repairHint: "연결 문자열을 확인하고 PostgreSQL이 실행 중인지 확인하세요",
       };
     }
   }
@@ -45,15 +45,15 @@ export async function databaseCheck(config: PaperclipConfig, configPath?: string
     return {
       name: "Database",
       status: "pass",
-      message: `Embedded PostgreSQL configured at ${dataDir} (port ${config.database.embeddedPostgresPort})`,
+      message: `내장 PostgreSQL이 ${dataDir}에 설정됨 (포트 ${config.database.embeddedPostgresPort})`,
     };
   }
 
   return {
     name: "Database",
     status: "fail",
-    message: `Unknown database mode: ${String(config.database.mode)}`,
+    message: `알 수 없는 데이터베이스 모드: ${String(config.database.mode)}`,
     canRepair: false,
-    repairHint: "Run `paperclipai configure --section database`",
+    repairHint: "`paperclipai configure --section database`를 실행하세요",
   };
 }

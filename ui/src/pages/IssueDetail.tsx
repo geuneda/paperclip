@@ -76,27 +76,27 @@ type IssueDetailComment = (IssueComment | OptimisticIssueComment) & {
 };
 
 const ACTION_LABELS: Record<string, string> = {
-  "issue.created": "created the issue",
-  "issue.updated": "updated the issue",
-  "issue.checked_out": "checked out the issue",
-  "issue.released": "released the issue",
-  "issue.comment_added": "added a comment",
-  "issue.attachment_added": "added an attachment",
-  "issue.attachment_removed": "removed an attachment",
-  "issue.document_created": "created a document",
-  "issue.document_updated": "updated a document",
-  "issue.document_deleted": "deleted a document",
-  "issue.deleted": "deleted the issue",
-  "agent.created": "created an agent",
-  "agent.updated": "updated the agent",
-  "agent.paused": "paused the agent",
-  "agent.resumed": "resumed the agent",
-  "agent.terminated": "terminated the agent",
-  "heartbeat.invoked": "invoked a heartbeat",
-  "heartbeat.cancelled": "cancelled a heartbeat",
-  "approval.created": "requested approval",
-  "approval.approved": "approved",
-  "approval.rejected": "rejected",
+  "issue.created": "Issue를 생성했습니다",
+  "issue.updated": "Issue를 수정했습니다",
+  "issue.checked_out": "Issue를 체크아웃했습니다",
+  "issue.released": "Issue를 반환했습니다",
+  "issue.comment_added": "댓글을 추가했습니다",
+  "issue.attachment_added": "첨부파일을 추가했습니다",
+  "issue.attachment_removed": "첨부파일을 제거했습니다",
+  "issue.document_created": "문서를 생성했습니다",
+  "issue.document_updated": "문서를 수정했습니다",
+  "issue.document_deleted": "문서를 삭제했습니다",
+  "issue.deleted": "Issue를 삭제했습니다",
+  "agent.created": "Agent를 생성했습니다",
+  "agent.updated": "Agent를 수정했습니다",
+  "agent.paused": "Agent를 일시정지했습니다",
+  "agent.resumed": "Agent를 재개했습니다",
+  "agent.terminated": "Agent를 종료했습니다",
+  "heartbeat.invoked": "Heartbeat를 호출했습니다",
+  "heartbeat.cancelled": "Heartbeat를 취소했습니다",
+  "approval.created": "승인을 요청했습니다",
+  "approval.approved": "승인했습니다",
+  "approval.rejected": "거부했습니다",
 };
 
 function humanizeValue(value: unknown): string {
@@ -162,27 +162,27 @@ function formatAction(action: string, details?: Record<string, unknown> | null):
       const from = previous.status;
       parts.push(
         from
-          ? `changed the status from ${humanizeValue(from)} to ${humanizeValue(details.status)}`
-          : `changed the status to ${humanizeValue(details.status)}`
+          ? `상태를 ${humanizeValue(from)}에서 ${humanizeValue(details.status)}(으)로 변경했습니다`
+          : `상태를 ${humanizeValue(details.status)}(으)로 변경했습니다`
       );
     }
     if (details.priority !== undefined) {
       const from = previous.priority;
       parts.push(
         from
-          ? `changed the priority from ${humanizeValue(from)} to ${humanizeValue(details.priority)}`
-          : `changed the priority to ${humanizeValue(details.priority)}`
+          ? `우선순위를 ${humanizeValue(from)}에서 ${humanizeValue(details.priority)}(으)로 변경했습니다`
+          : `우선순위를 ${humanizeValue(details.priority)}(으)로 변경했습니다`
       );
     }
     if (details.assigneeAgentId !== undefined || details.assigneeUserId !== undefined) {
       parts.push(
         details.assigneeAgentId || details.assigneeUserId
-          ? "assigned the issue"
-          : "unassigned the issue",
+          ? "Issue를 배정했습니다"
+          : "Issue 배정을 해제했습니다",
       );
     }
-    if (details.title !== undefined) parts.push("updated the title");
-    if (details.description !== undefined) parts.push("updated the description");
+    if (details.title !== undefined) parts.push("제목을 수정했습니다");
+    if (details.description !== undefined) parts.push("설명을 수정했습니다");
 
     if (parts.length > 0) return parts.join(", ");
   }
@@ -203,9 +203,9 @@ function ActorIdentity({ evt, agentMap }: { evt: ActivityEvent; agentMap: Map<st
     const agent = agentMap.get(id);
     return <Identity name={agent?.name ?? id.slice(0, 8)} size="sm" />;
   }
-  if (evt.actorType === "system") return <Identity name="System" size="sm" />;
+  if (evt.actorType === "system") return <Identity name="시스템" size="sm" />;
   if (evt.actorType === "user") return <Identity name="Board" size="sm" />;
-  return <Identity name={id || "Unknown"} size="sm" />;
+  return <Identity name={id || "알 수 없음"} size="sm" />;
 }
 
 export function IssueDetail() {
@@ -605,8 +605,8 @@ export function IssueDetail() {
         queryClient.setQueryData(queryKeys.issues.detail(issueId!), context.previousIssue);
       }
       pushToast({
-        title: "Comment failed",
-        body: err instanceof Error ? err.message : "Unable to post comment",
+        title: "댓글 작성 실패",
+        body: err instanceof Error ? err.message : "댓글을 게시할 수 없습니다",
         tone: "error",
       });
     },
@@ -693,8 +693,8 @@ export function IssueDetail() {
         queryClient.setQueryData(queryKeys.issues.detail(issueId!), context.previousIssue);
       }
       pushToast({
-        title: "Comment failed",
-        body: err instanceof Error ? err.message : "Unable to post comment",
+        title: "댓글 작성 실패",
+        body: err instanceof Error ? err.message : "댓글을 게시할 수 없습니다",
         tone: "error",
       });
     },
@@ -709,15 +709,15 @@ export function IssueDetail() {
     onSuccess: () => {
       invalidateIssue();
       pushToast({
-        title: "Interrupt requested",
-        body: "The active run is stopping so queued comments can continue next.",
+        title: "중단 요청됨",
+        body: "대기 중인 댓글이 이어질 수 있도록 활성 실행을 중단합니다.",
         tone: "success",
       });
     },
     onError: (err) => {
       pushToast({
-        title: "Interrupt failed",
-        body: err instanceof Error ? err.message : "Unable to interrupt the active run",
+        title: "중단 실패",
+        body: err instanceof Error ? err.message : "활성 실행을 중단할 수 없습니다",
         tone: "error",
       });
     },
@@ -734,7 +734,7 @@ export function IssueDetail() {
       invalidateIssue();
     },
     onError: (err) => {
-      setAttachmentError(err instanceof Error ? err.message : "Upload failed");
+      setAttachmentError(err instanceof Error ? err.message : "업로드에 실패했습니다");
     },
   });
 
@@ -758,7 +758,7 @@ export function IssueDetail() {
       invalidateIssue();
     },
     onError: (err) => {
-      setAttachmentError(err instanceof Error ? err.message : "Document import failed");
+      setAttachmentError(err instanceof Error ? err.message : "문서 가져오기에 실패했습니다");
     },
   });
 
@@ -770,7 +770,7 @@ export function IssueDetail() {
       invalidateIssue();
     },
     onError: (err) => {
-      setAttachmentError(err instanceof Error ? err.message : "Delete failed");
+      setAttachmentError(err instanceof Error ? err.message : "삭제에 실패했습니다");
     },
   });
 
@@ -820,11 +820,11 @@ export function IssueDetail() {
     const md = `# ${issue.identifier}: ${title}\n\n${body}`.trimEnd();
     await navigator.clipboard.writeText(md);
     setCopied(true);
-    pushToast({ title: "Copied to clipboard", tone: "success" });
+    pushToast({ title: "클립보드에 복사되었습니다", tone: "success" });
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading...</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">불러오는 중...</p>;
   if (error) return <p className="text-sm text-destructive">{error.message}</p>;
   if (!issue) return null;
 
@@ -883,10 +883,10 @@ export function IssueDetail() {
         )}
       >
         <Paperclip className="h-3.5 w-3.5 mr-1.5" />
-        {uploadAttachment.isPending || importMarkdownDocument.isPending ? "Uploading..." : (
+        {uploadAttachment.isPending || importMarkdownDocument.isPending ? "업로드 중..." : (
           <>
-            <span className="hidden sm:inline">Upload attachment</span>
-            <span className="sm:hidden">Upload</span>
+            <span className="hidden sm:inline">첨부파일 업로드</span>
+            <span className="sm:hidden">업로드</span>
           </>
         )}
       </Button>
@@ -919,7 +919,7 @@ export function IssueDetail() {
       {issue.hiddenAt && (
         <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           <EyeOff className="h-4 w-4 shrink-0" />
-          This issue is hidden
+          이 Issue는 숨겨져 있습니다
         </div>
       )}
 
@@ -966,7 +966,7 @@ export function IssueDetail() {
           ) : (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground opacity-50 px-1 -mx-1 py-0.5">
               <Hexagon className="h-3 w-3 shrink-0" />
-              No project
+              Project 없음
             </span>
           )}
 
@@ -996,7 +996,7 @@ export function IssueDetail() {
               variant="ghost"
               size="icon-xs"
               onClick={copyIssueToClipboard}
-              title="Copy issue as markdown"
+              title="Issue를 마크다운으로 복사"
             >
               {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             </Button>
@@ -1004,7 +1004,7 @@ export function IssueDetail() {
               variant="ghost"
               size="icon-xs"
               onClick={() => setMobilePropsOpen(true)}
-              title="Properties"
+              title="속성"
             >
               <SlidersHorizontal className="h-4 w-4" />
             </Button>
@@ -1015,7 +1015,7 @@ export function IssueDetail() {
               variant="ghost"
               size="icon-xs"
               onClick={copyIssueToClipboard}
-              title="Copy issue as markdown"
+              title="Issue를 마크다운으로 복사"
             >
               {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
             </Button>
@@ -1027,7 +1027,7 @@ export function IssueDetail() {
                 panelVisible ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100",
               )}
               onClick={() => setPanelVisible(true)}
-              title="Show properties"
+              title="속성 표시"
             >
               <SlidersHorizontal className="h-4 w-4" />
             </Button>
@@ -1050,7 +1050,7 @@ export function IssueDetail() {
                 }}
               >
                 <EyeOff className="h-3 w-3" />
-                Hide this Issue
+                이 Issue 숨기기
               </button>
             </PopoverContent>
             </Popover>
@@ -1069,7 +1069,7 @@ export function IssueDetail() {
           onSave={(description) => updateIssue.mutateAsync({ description })}
           as="p"
           className="text-[15px] leading-7 text-foreground"
-          placeholder="Add a description..."
+          placeholder="설명 추가..."
           multiline
           mentions={mentionOptions}
           imageUploadHandler={async (file) => {
@@ -1151,7 +1151,7 @@ export function IssueDetail() {
         onDrop={(evt) => void handleAttachmentDrop(evt)}
       >
         <div className="flex items-center justify-between gap-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Attachments</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">첨부파일</h3>
           {attachmentUploadButton}
         </div>
 
@@ -1177,7 +1177,7 @@ export function IssueDetail() {
                   className="text-muted-foreground hover:text-destructive"
                   onClick={() => deleteAttachment.mutate(attachment.id)}
                   disabled={deleteAttachment.isPending}
-                  title="Delete attachment"
+                  title="첨부파일 삭제"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -1213,15 +1213,15 @@ export function IssueDetail() {
         <TabsList variant="line" className="w-full justify-start gap-1">
           <TabsTrigger value="comments" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
-            Comments
+            댓글
           </TabsTrigger>
           <TabsTrigger value="subissues" className="gap-1.5">
             <ListTree className="h-3.5 w-3.5" />
-            Sub-issues
+            하위 Issue
           </TabsTrigger>
           <TabsTrigger value="activity" className="gap-1.5">
             <ActivityIcon className="h-3.5 w-3.5" />
-            Activity
+            활동
           </TabsTrigger>
           {issuePluginTabItems.map((item) => (
             <TabsTrigger key={item.value} value={item.value}>

@@ -94,7 +94,7 @@ export function Issues() {
   });
 
   if (!selectedCompanyId) {
-    return <EmptyState icon={CircleDot} message="Select a company to view issues." />;
+    return <EmptyState icon={CircleDot} message="Issue를 보려면 회사를 선택하세요." />;
   }
 
   return (

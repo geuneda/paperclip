@@ -116,7 +116,7 @@ export function assetRoutes(db: Db, storage: StorageService) {
     } catch (err) {
       if (err instanceof multer.MulterError) {
         if (err.code === "LIMIT_FILE_SIZE") {
-          res.status(422).json({ error: `File exceeds ${MAX_ATTACHMENT_BYTES} bytes` });
+          res.status(422).json({ error: `파일이 ${MAX_ATTACHMENT_BYTES} 바이트를 초과합니다` });
           return;
         }
         res.status(400).json({ error: err.message });
@@ -127,33 +127,33 @@ export function assetRoutes(db: Db, storage: StorageService) {
 
     const file = (req as Request & { file?: { mimetype: string; buffer: Buffer; originalname: string } }).file;
     if (!file) {
-      res.status(400).json({ error: "Missing file field 'file'" });
+      res.status(400).json({ error: "'file' 필드가 누락되었습니다" });
       return;
     }
 
     const parsedMeta = createAssetImageMetadataSchema.safeParse(req.body ?? {});
     if (!parsedMeta.success) {
-      res.status(400).json({ error: "Invalid image metadata", details: parsedMeta.error.issues });
+      res.status(400).json({ error: "잘못된 이미지 메타데이터", details: parsedMeta.error.issues });
       return;
     }
 
     const namespaceSuffix = parsedMeta.data.namespace ?? "general";
     const contentType = (file.mimetype || "").toLowerCase();
     if (contentType !== SVG_CONTENT_TYPE && !isAllowedContentType(contentType)) {
-      res.status(422).json({ error: `Unsupported file type: ${contentType || "unknown"}` });
+      res.status(422).json({ error: `지원하지 않는 파일 유형입니다: ${contentType || "unknown"}` });
       return;
     }
     let fileBody = file.buffer;
     if (contentType === SVG_CONTENT_TYPE) {
       const sanitized = sanitizeSvgBuffer(file.buffer);
       if (!sanitized || sanitized.length <= 0) {
-        res.status(422).json({ error: "SVG could not be sanitized" });
+        res.status(422).json({ error: "SVG를 살균할 수 없습니다" });
         return;
       }
       fileBody = sanitized;
     }
     if (fileBody.length <= 0) {
-      res.status(422).json({ error: "Image is empty" });
+      res.status(422).json({ error: "이미지가 비어 있습니다" });
       return;
     }
 
@@ -219,7 +219,7 @@ export function assetRoutes(db: Db, storage: StorageService) {
     } catch (err) {
       if (err instanceof multer.MulterError) {
         if (err.code === "LIMIT_FILE_SIZE") {
-          res.status(422).json({ error: `Image exceeds ${MAX_ATTACHMENT_BYTES} bytes` });
+          res.status(422).json({ error: `이미지가 ${MAX_ATTACHMENT_BYTES} 바이트를 초과합니다` });
           return;
         }
         res.status(400).json({ error: err.message });
@@ -230,13 +230,13 @@ export function assetRoutes(db: Db, storage: StorageService) {
 
     const file = (req as Request & { file?: { mimetype: string; buffer: Buffer; originalname: string } }).file;
     if (!file) {
-      res.status(400).json({ error: "Missing file field 'file'" });
+      res.status(400).json({ error: "'file' 필드가 누락되었습니다" });
       return;
     }
 
     const contentType = (file.mimetype || "").toLowerCase();
     if (!ALLOWED_COMPANY_LOGO_CONTENT_TYPES.has(contentType)) {
-      res.status(422).json({ error: `Unsupported image type: ${contentType || "unknown"}` });
+      res.status(422).json({ error: `지원하지 않는 이미지 유형입니다: ${contentType || "unknown"}` });
       return;
     }
 
@@ -244,14 +244,14 @@ export function assetRoutes(db: Db, storage: StorageService) {
     if (contentType === SVG_CONTENT_TYPE) {
       const sanitized = sanitizeSvgBuffer(file.buffer);
       if (!sanitized || sanitized.length <= 0) {
-        res.status(422).json({ error: "SVG could not be sanitized" });
+        res.status(422).json({ error: "SVG를 살균할 수 없습니다" });
         return;
       }
       fileBody = sanitized;
     }
 
     if (fileBody.length <= 0) {
-      res.status(422).json({ error: "Image is empty" });
+      res.status(422).json({ error: "이미지가 비어 있습니다" });
       return;
     }
 
@@ -313,7 +313,7 @@ export function assetRoutes(db: Db, storage: StorageService) {
     const assetId = req.params.assetId as string;
     const asset = await svc.getById(assetId);
     if (!asset) {
-      res.status(404).json({ error: "Asset not found" });
+      res.status(404).json({ error: "에셋을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, asset.companyId);

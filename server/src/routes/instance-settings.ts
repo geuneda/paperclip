@@ -8,12 +8,12 @@ import { getActorInfo } from "./authz.js";
 
 function assertCanManageInstanceSettings(req: Request) {
   if (req.actor.type !== "board") {
-    throw forbidden("Board access required");
+    throw forbidden("Board 접근 권한이 필요합니다");
   }
   if (req.actor.source === "local_implicit" || req.actor.isInstanceAdmin) {
     return;
   }
-  throw forbidden("Instance admin access required");
+  throw forbidden("인스턴스 관리자 권한이 필요합니다");
 }
 
 export function instanceSettingsRoutes(db: Db) {

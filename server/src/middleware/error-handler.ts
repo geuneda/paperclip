@@ -53,7 +53,7 @@ export function errorHandler(
   }
 
   if (err instanceof ZodError) {
-    res.status(400).json({ error: "Validation error", details: err.errors });
+    res.status(400).json({ error: "유효성 검사 오류", details: err.errors });
     return;
   }
 
@@ -67,5 +67,5 @@ export function errorHandler(
     rootError,
   );
 
-  res.status(500).json({ error: "Internal server error" });
+  res.status(500).json({ error: "내부 서버 오류" });
 }

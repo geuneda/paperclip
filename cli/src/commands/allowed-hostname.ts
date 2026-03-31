@@ -8,7 +8,7 @@ export async function addAllowedHostname(host: string, opts: { config?: string }
   const config = readConfig(opts.config);
 
   if (!config) {
-    p.log.error(`No config found at ${configPath}. Run ${pc.cyan("paperclip onboard")} first.`);
+    p.log.error(`${configPath}에서 설정을 찾을 수 없습니다. 먼저 ${pc.cyan("paperclip onboard")}를 실행하세요.`);
     return;
   }
 
@@ -23,17 +23,17 @@ export async function addAllowedHostname(host: string, opts: { config?: string }
   writeConfig(config, opts.config);
 
   if (existed) {
-    p.log.info(`Hostname ${pc.cyan(normalized)} is already allowed.`);
+    p.log.info(`호스트명 ${pc.cyan(normalized)}은(는) 이미 허용되어 있습니다.`);
   } else {
-    p.log.success(`Added allowed hostname: ${pc.cyan(normalized)}`);
+    p.log.success(`허용된 호스트명 추가됨: ${pc.cyan(normalized)}`);
     p.log.message(
-      pc.dim("Restart the Paperclip server for this change to take effect."),
+      pc.dim("이 변경 사항을 적용하려면 Paperclip 서버를 재시작하세요."),
     );
   }
 
   if (!(config.server.deploymentMode === "authenticated" && config.server.exposure === "private")) {
     p.log.message(
-      pc.dim("Note: allowed hostnames are enforced only in authenticated/private mode."),
+      pc.dim("참고: 허용된 호스트명은 authenticated/private 모드에서만 적용됩니다."),
     );
   }
 }

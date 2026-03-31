@@ -37,7 +37,7 @@ function resolveConnectionString(configPath?: string): { value: string; source: 
 function normalizeRetentionDays(value: number | undefined, fallback: number): number {
   const candidate = value ?? fallback;
   if (!Number.isInteger(candidate) || candidate < 1) {
-    throw new Error(`Invalid retention days '${String(candidate)}'. Use a positive integer.`);
+    throw new Error(`유효하지 않은 보관 일수 '${String(candidate)}'. 양의 정수를 사용하세요.`);
   }
   return candidate;
 }
@@ -62,13 +62,13 @@ export async function dbBackupCommand(opts: DbBackupOptions): Promise<void> {
   );
   const filenamePrefix = opts.filenamePrefix?.trim() || "paperclip";
 
-  p.log.message(pc.dim(`Config: ${configPath}`));
-  p.log.message(pc.dim(`Connection source: ${connection.source}`));
-  p.log.message(pc.dim(`Backup dir: ${backupDir}`));
-  p.log.message(pc.dim(`Retention: ${retentionDays} day(s)`));
+  p.log.message(pc.dim(`설정: ${configPath}`));
+  p.log.message(pc.dim(`연결 소스: ${connection.source}`));
+  p.log.message(pc.dim(`백업 디렉토리: ${backupDir}`));
+  p.log.message(pc.dim(`보관 기간: ${retentionDays}일`));
 
   const spinner = p.spinner();
-  spinner.start("Creating database backup...");
+  spinner.start("데이터베이스 백업 생성 중...");
   try {
     const result = await runDatabaseBackup({
       connectionString: connection.value,
@@ -76,7 +76,7 @@ export async function dbBackupCommand(opts: DbBackupOptions): Promise<void> {
       retentionDays,
       filenamePrefix,
     });
-    spinner.stop(`Backup saved: ${formatDatabaseBackupResult(result)}`);
+    spinner.stop(`백업 저장됨: ${formatDatabaseBackupResult(result)}`);
 
     if (opts.json) {
       console.log(
@@ -94,9 +94,9 @@ export async function dbBackupCommand(opts: DbBackupOptions): Promise<void> {
         ),
       );
     }
-    p.outro(pc.green("Backup completed."));
+    p.outro(pc.green("백업이 완료되었습니다."));
   } catch (err) {
-    spinner.stop(pc.red("Backup failed."));
+    spinner.stop(pc.red("백업에 실패했습니다."));
     throw err;
   }
 }

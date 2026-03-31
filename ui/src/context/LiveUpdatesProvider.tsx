@@ -64,11 +64,11 @@ function resolveActorLabel(
   if (actorType === "agent" && actorId) {
     return resolveAgentName(queryClient, companyId, actorId) ?? `Agent ${shortId(actorId)}`;
   }
-  if (actorType === "system") return "System";
+  if (actorType === "system") return "시스템";
   if (actorType === "user" && actorId) {
     return "Board";
   }
-  return "Someone";
+  return "누군가";
 }
 
 interface IssueToastContext {
@@ -261,19 +261,19 @@ const RUN_TOAST_STATUSES = new Set(["failed", "timed_out", "cancelled"]);
 function describeIssueUpdate(details: Record<string, unknown> | null): string | null {
   if (!details) return null;
   const changes: string[] = [];
-  if (typeof details.status === "string") changes.push(`status -> ${details.status.replace(/_/g, " ")}`);
-  if (typeof details.priority === "string") changes.push(`priority -> ${details.priority}`);
+  if (typeof details.status === "string") changes.push(`상태 -> ${details.status.replace(/_/g, " ")}`);
+  if (typeof details.priority === "string") changes.push(`우선순위 -> ${details.priority}`);
   if (typeof details.assigneeAgentId === "string" || typeof details.assigneeUserId === "string") {
-    changes.push("reassigned");
+    changes.push("담당자 변경됨");
   } else if (details.assigneeAgentId === null || details.assigneeUserId === null) {
-    changes.push("unassigned");
+    changes.push("담당자 해제됨");
   }
   if (details.reopened === true) {
     const from = readString(details.reopenedFrom);
-    changes.push(from ? `reopened from ${from.replace(/_/g, " ")}` : "reopened");
+    changes.push(from ? `${from.replace(/_/g, " ")}에서 다시 열림` : "다시 열림");
   }
-  if (typeof details.title === "string") changes.push("title changed");
-  if (typeof details.description === "string") changes.push("description changed");
+  if (typeof details.title === "string") changes.push("제목 변경됨");
+  if (typeof details.description === "string") changes.push("설명 변경됨");
   if (changes.length > 0) return changes.join(", ");
   return null;
 }
@@ -304,10 +304,10 @@ function buildActivityToast(
 
   if (action === "issue.created") {
     return {
-      title: `${actor} created ${issue.ref}`,
+      title: `${actor}이(가) ${issue.ref}을(를) 생성했습니다`,
       body: issue.title ? truncate(issue.title, 96) : undefined,
       tone: "success",
-      action: { label: `View ${issue.ref}`, href: issue.href },
+      action: { label: `${issue.ref} 보기`, href: issue.href },
       dedupeKey: `activity:${action}:${entityId}`,
     };
   }
@@ -326,10 +326,10 @@ function buildActivityToast(
         ? truncate(issue.title, 96)
         : issue.label;
     return {
-      title: `${actor} updated ${issue.ref}`,
+      title: `${actor}이(가) ${issue.ref}을(를) 수정했습니다`,
       body: truncate(body, 100),
       tone: "info",
-      action: { label: `View ${issue.ref}`, href: issue.href },
+      action: { label: `${issue.ref} 보기`, href: issue.href },
       dedupeKey: `activity:${action}:${entityId}`,
     };
   }
@@ -341,14 +341,14 @@ function buildActivityToast(
   const reopenedFrom = readString(details?.reopenedFrom);
   const reopenedLabel = reopened
     ? reopenedFrom
-      ? `reopened from ${reopenedFrom.replace(/_/g, " ")}`
-      : "reopened"
+      ? `${reopenedFrom.replace(/_/g, " ")}에서 다시 열림`
+      : "다시 열림"
     : null;
   const title = reopened
-    ? `${actor} reopened and commented on ${issue.ref}`
+    ? `${actor}이(가) ${issue.ref}을(를) 다시 열고 댓글을 남겼습니다`
     : updated
-      ? `${actor} commented and updated ${issue.ref}`
-      : `${actor} commented on ${issue.ref}`;
+      ? `${actor}이(가) ${issue.ref}에 댓글을 남기고 수정했습니다`
+      : `${actor}이(가) ${issue.ref}에 댓글을 남겼습니다`;
   const body = bodySnippet
     ? reopenedLabel
       ? `${reopenedLabel} - ${bodySnippet.replace(/^#+\s*/m, "").replace(/\n/g, " ")}`
@@ -362,7 +362,7 @@ function buildActivityToast(
     title,
     body: body ? truncate(body, 96) : undefined,
     tone: "info",
-    action: { label: `View ${issue.ref}`, href: issue.href },
+    action: { label: `${issue.ref} 보기`, href: issue.href },
     dedupeKey: `activity:${action}:${entityId}:${commentId ?? "na"}`,
   };
 }
@@ -379,13 +379,13 @@ function buildJoinRequestToast(
   if (action !== "join.requested" && action !== "join.request_replayed") return null;
 
   const requestType = readString(details?.requestType);
-  const label = requestType === "agent" ? "Agent" : "Someone";
+  const label = requestType === "agent" ? "Agent" : "누군가";
 
   return {
-    title: `${label} wants to join`,
-    body: "A new join request is waiting for approval.",
+    title: `${label}이(가) 참여를 요청했습니다`,
+    body: "새로운 참여 요청이 승인을 기다리고 있습니다.",
     tone: "info",
-    action: { label: "View inbox", href: "/inbox/mine" },
+    action: { label: "Inbox 보기", href: "/inbox/mine" },
     dedupeKey: `join-request:${entityId}`,
   };
 }
@@ -404,8 +404,8 @@ function buildAgentStatusToast(
   const name = nameOf(agentId) ?? `Agent ${shortId(agentId)}`;
   const title =
     status === "running"
-      ? `${name} started`
-      : `${name} errored`;
+      ? `${name}이(가) 시작되었습니다`
+      : `${name}에 오류가 발생했습니다`;
 
   const agents = queryClient.getQueryData<Agent[]>(queryKeys.agents.list(companyId));
   const agent = agents?.find((a) => a.id === agentId);
@@ -415,7 +415,7 @@ function buildAgentStatusToast(
     title,
     body,
     tone,
-    action: { label: "View agent", href: `/agents/${agentId}` },
+    action: { label: "Agent 보기", href: `/agents/${agentId}` },
     dedupeKey: `agent-status:${agentId}:${status}`,
   };
 }
@@ -434,17 +434,17 @@ function buildRunStatusToast(
   const name = nameOf(agentId) ?? `Agent ${shortId(agentId)}`;
   const tone = status === "succeeded" ? "success" : status === "cancelled" ? "warn" : "error";
   const statusLabel =
-    status === "succeeded" ? "succeeded"
-      : status === "failed" ? "failed"
-        : status === "timed_out" ? "timed out"
-          : "cancelled";
-  const title = `${name} run ${statusLabel}`;
+    status === "succeeded" ? "성공했습니다"
+      : status === "failed" ? "실패했습니다"
+        : status === "timed_out" ? "시간 초과되었습니다"
+          : "취소되었습니다";
+  const title = `${name} 실행이 ${statusLabel}`;
 
   let body: string | undefined;
   if (error) {
     body = truncate(error, 100);
   } else if (triggerDetail) {
-    body = `Trigger: ${triggerDetail}`;
+    body = `트리거: ${triggerDetail}`;
   }
 
   return {
@@ -452,7 +452,7 @@ function buildRunStatusToast(
     body,
     tone,
     ttlMs: status === "succeeded" ? 5000 : 7000,
-    action: { label: "View run", href: `/agents/${agentId}/runs/${runId}` },
+    action: { label: "실행 보기", href: `/agents/${agentId}/runs/${runId}` },
     dedupeKey: `run-status:${runId}:${status}`,
   };
 }

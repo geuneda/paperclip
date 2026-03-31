@@ -1584,17 +1584,17 @@ export function accessRoutes(
     if (req.actor.type !== "board") throw unauthorized();
     if (isLocalImplicit(req)) return;
     const allowed = await access.isInstanceAdmin(req.actor.userId);
-    if (!allowed) throw forbidden("Instance admin required");
+    if (!allowed) throw forbidden("인스턴스 관리자 권한이 필요합니다");
   }
 
   router.get("/board-claim/:token", async (req, res) => {
     const token = (req.params.token as string).trim();
     const code =
       typeof req.query.code === "string" ? req.query.code.trim() : undefined;
-    if (!token) throw notFound("Board claim challenge not found");
+    if (!token) throw notFound("Board 소유권 인증을 찾을 수 없습니다");
     const challenge = inspectBoardClaimChallenge(token, code);
     if (challenge.status === "invalid")
-      throw notFound("Board claim challenge not found");
+      throw notFound("Board 소유권 인증을 찾을 수 없습니다");
     res.json(challenge);
   });
 
@@ -1602,14 +1602,14 @@ export function accessRoutes(
     const token = (req.params.token as string).trim();
     const code =
       typeof req.body?.code === "string" ? req.body.code.trim() : undefined;
-    if (!token) throw notFound("Board claim challenge not found");
-    if (!code) throw badRequest("Claim code is required");
+    if (!token) throw notFound("Board 소유권 인증을 찾을 수 없습니다");
+    if (!code) throw badRequest("인증 코드가 필요합니다");
     if (
       req.actor.type !== "board" ||
       req.actor.source !== "session" ||
       !req.actor.userId
     ) {
-      throw unauthorized("Sign in before claiming board ownership");
+      throw unauthorized("Board 소유권을 인증하려면 먼저 로그인하세요");
     }
 
     const claimed = await claimBoardOwnership(db, {
@@ -1619,10 +1619,10 @@ export function accessRoutes(
     });
 
     if (claimed.status === "invalid")
-      throw notFound("Board claim challenge not found");
+      throw notFound("Board 소유권 인증을 찾을 수 없습니다");
     if (claimed.status === "expired")
       throw conflict(
-        "Board claim challenge expired. Restart server to generate a new one."
+        "Board 소유권 인증이 만료되었습니다. 서버를 재시작하여 새로 생성하세요."
       );
     if (claimed.status === "claimed") {
       res.json({
@@ -1632,7 +1632,7 @@ export function accessRoutes(
       return;
     }
 
-    throw conflict("Board claim challenge is no longer available");
+    throw conflict("Board 소유권 인증을 더 이상 사용할 수 없습니다");
   });
 
   router.post(
@@ -1662,9 +1662,9 @@ export function accessRoutes(
     const id = (req.params.id as string).trim();
     const token =
       typeof req.query.token === "string" ? req.query.token.trim() : "";
-    if (!id || !token) throw notFound("CLI auth challenge not found");
+    if (!id || !token) throw notFound("CLI 인증 챌린지를 찾을 수 없습니다");
     const challenge = await boardAuth.describeCliAuthChallenge(id, token);
-    if (!challenge) throw notFound("CLI auth challenge not found");
+    if (!challenge) throw notFound("CLI 인증 챌린지를 찾을 수 없습니다");
 
     const isSignedInBoardUser =
       req.actor.type === "board" &&
@@ -1752,7 +1752,7 @@ export function accessRoutes(
 
   router.get("/cli-auth/me", async (req, res) => {
     if (req.actor.type !== "board" || !req.actor.userId) {
-      throw unauthorized("Board authentication required");
+      throw unauthorized("Board 인증이 필요합니다");
     }
     const accessSnapshot = await boardAuth.resolveBoardAccess(req.actor.userId);
     res.json({
@@ -1767,7 +1767,7 @@ export function accessRoutes(
 
   router.post("/cli-auth/revoke-current", async (req, res) => {
     if (req.actor.type !== "board" || req.actor.source !== "board_key") {
-      throw badRequest("Current board API key context is required");
+      throw badRequest("현재 Board API 키 컨텍스트가 필요합니다");
     }
     const key = await boardAuth.assertCurrentBoardKey(
       req.actor.keyId,
@@ -1809,7 +1809,7 @@ export function accessRoutes(
         req.actor.agentId,
         permissionKey
       );
-      if (!allowed) throw forbidden("Permission denied");
+      if (!allowed) throw forbidden("권한이 거부되었습니다");
       return;
     }
     if (req.actor.type !== "board") throw unauthorized();
@@ -1819,7 +1819,7 @@ export function accessRoutes(
       req.actor.userId,
       permissionKey
     );
-    if (!allowed) throw forbidden("Permission denied");
+    if (!allowed) throw forbidden("권한이 거부되었습니다");
   }
 
   async function assertCanGenerateOpenClawInvitePrompt(
@@ -1828,7 +1828,7 @@ export function accessRoutes(
   ) {
     assertCompanyAccess(req, companyId);
     if (req.actor.type === "agent") {
-      if (!req.actor.agentId) throw forbidden("Agent authentication required");
+      if (!req.actor.agentId) throw forbidden("Agent 인증이 필요합니다");
       const actorAgent = await agents.getById(req.actor.agentId);
       if (!actorAgent || actorAgent.companyId !== companyId) {
         throw forbidden("Agent key cannot access another company");
@@ -1841,7 +1841,7 @@ export function accessRoutes(
     if (req.actor.type !== "board") throw unauthorized();
     if (isLocalImplicit(req)) return;
     const allowed = await access.canUser(companyId, req.actor.userId, "users:invite");
-    if (!allowed) throw forbidden("Permission denied");
+    if (!allowed) throw forbidden("권한이 거부되었습니다");
   }
 
   async function createCompanyInviteForCompany(input: {
@@ -1929,7 +1929,7 @@ export function accessRoutes(
   router.get("/skills/:skillName", (req, res) => {
     const skillName = (req.params.skillName as string).trim().toLowerCase();
     const markdown = readSkillMarkdown(skillName);
-    if (!markdown) throw notFound("Skill not found");
+    if (!markdown) throw notFound("스킬을 찾을 수 없습니다");
     res.type("text/markdown").send(markdown);
   });
 
@@ -2039,7 +2039,7 @@ export function accessRoutes(
 
   router.get("/invites/:token", async (req, res) => {
     const token = (req.params.token as string).trim();
-    if (!token) throw notFound("Invite not found");
+    if (!token) throw notFound("초대를 찾을 수 없습니다");
     const invite = await db
       .select()
       .from(invites)
@@ -2051,7 +2051,7 @@ export function accessRoutes(
       invite.acceptedAt ||
       inviteExpired(invite)
     ) {
-      throw notFound("Invite not found");
+      throw notFound("초대를 찾을 수 없습니다");
     }
 
     const companyName = await getInviteCompanyName(invite.companyId);
@@ -2060,14 +2060,14 @@ export function accessRoutes(
 
   router.get("/invites/:token/onboarding", async (req, res) => {
     const token = (req.params.token as string).trim();
-    if (!token) throw notFound("Invite not found");
+    if (!token) throw notFound("초대를 찾을 수 없습니다");
     const invite = await db
       .select()
       .from(invites)
       .where(eq(invites.tokenHash, hashToken(token)))
       .then((rows) => rows[0] ?? null);
     if (!invite || invite.revokedAt || inviteExpired(invite)) {
-      throw notFound("Invite not found");
+      throw notFound("초대를 찾을 수 없습니다");
     }
 
     const companyName = await getInviteCompanyName(invite.companyId);
@@ -2079,14 +2079,14 @@ export function accessRoutes(
 
   router.get("/invites/:token/onboarding.txt", async (req, res) => {
     const token = (req.params.token as string).trim();
-    if (!token) throw notFound("Invite not found");
+    if (!token) throw notFound("초대를 찾을 수 없습니다");
     const invite = await db
       .select()
       .from(invites)
       .where(eq(invites.tokenHash, hashToken(token)))
       .then((rows) => rows[0] ?? null);
     if (!invite || invite.revokedAt || inviteExpired(invite)) {
-      throw notFound("Invite not found");
+      throw notFound("초대를 찾을 수 없습니다");
     }
 
     const companyName = await getInviteCompanyName(invite.companyId);
@@ -2102,19 +2102,19 @@ export function accessRoutes(
 
   router.get("/invites/:token/test-resolution", async (req, res) => {
     const token = (req.params.token as string).trim();
-    if (!token) throw notFound("Invite not found");
+    if (!token) throw notFound("초대를 찾을 수 없습니다");
     const invite = await db
       .select()
       .from(invites)
       .where(eq(invites.tokenHash, hashToken(token)))
       .then((rows) => rows[0] ?? null);
     if (!invite || invite.revokedAt || inviteExpired(invite)) {
-      throw notFound("Invite not found");
+      throw notFound("초대를 찾을 수 없습니다");
     }
 
     const rawUrl =
       typeof req.query.url === "string" ? req.query.url.trim() : "";
-    if (!rawUrl) throw badRequest("url query parameter is required");
+    if (!rawUrl) throw badRequest("url 쿼리 파라미터가 필요합니다");
     let target: URL;
     try {
       target = new URL(rawUrl);
@@ -2147,7 +2147,7 @@ export function accessRoutes(
     validate(acceptInviteSchema),
     async (req, res) => {
       const token = (req.params.token as string).trim();
-      if (!token) throw notFound("Invite not found");
+      if (!token) throw notFound("초대를 찾을 수 없습니다");
 
       const invite = await db
         .select()
@@ -2155,7 +2155,7 @@ export function accessRoutes(
         .where(eq(invites.tokenHash, hashToken(token)))
         .then((rows) => rows[0] ?? null);
       if (!invite || invite.revokedAt || inviteExpired(invite)) {
-        throw notFound("Invite not found");
+        throw notFound("초대를 찾을 수 없습니다");
       }
       const inviteAlreadyAccepted = Boolean(invite.acceptedAt);
       const existingJoinRequestForInvite = inviteAlreadyAccepted
@@ -2167,7 +2167,7 @@ export function accessRoutes(
         : null;
 
       if (invite.inviteType === "bootstrap_ceo") {
-        if (inviteAlreadyAccepted) throw notFound("Invite not found");
+        if (inviteAlreadyAccepted) throw notFound("초대를 찾을 수 없습니다");
         if (req.body.requestType !== "human") {
           throw badRequest("Bootstrap invite requires human request type");
         }
@@ -2219,7 +2219,7 @@ export function accessRoutes(
         !req.actor.userId &&
         !isLocalImplicit(req)
       ) {
-        throw unauthorized("Authenticated user is required");
+        throw unauthorized("인증된 사용자가 필요합니다");
       }
       if (requestType === "agent" && !req.body.agentName) {
         if (
@@ -2239,13 +2239,13 @@ export function accessRoutes(
           existingJoinRequest: existingJoinRequestForInvite
         })
       ) {
-        throw notFound("Invite not found");
+        throw notFound("초대를 찾을 수 없습니다");
       }
       const replayJoinRequestId = inviteAlreadyAccepted
         ? existingJoinRequestForInvite?.id ?? null
         : null;
       if (inviteAlreadyAccepted && !replayJoinRequestId) {
-        throw conflict("Join request not found");
+        throw conflict("가입 요청을 찾을 수 없습니다");
       }
 
       const replayMergedDefaults = inviteAlreadyAccepted
@@ -2381,7 +2381,7 @@ export function accessRoutes(
             .then((rows) => rows[0]);
 
       if (!created) {
-        throw conflict("Join request not found");
+        throw conflict("가입 요청을 찾을 수 없습니다");
       }
 
       if (
@@ -2393,7 +2393,7 @@ export function accessRoutes(
       ) {
         const existingAgent = await agents.getById(created.createdAgentId);
         if (!existingAgent) {
-          throw conflict("Approved join request agent not found");
+          throw conflict("승인된 가입 요청의 Agent를 찾을 수 없습니다");
         }
         const existingAdapterConfig = isPlainObject(existingAgent.adapterConfig)
           ? (existingAgent.adapterConfig as Record<string, unknown>)
@@ -2407,7 +2407,7 @@ export function accessRoutes(
           adapterConfig: nextAdapterConfig
         });
         if (!updatedAgent) {
-          throw conflict("Approved join request agent not found");
+          throw conflict("승인된 가입 요청의 Agent를 찾을 수 없습니다");
         }
         await logActivity(db, {
           companyId,
@@ -2542,7 +2542,7 @@ export function accessRoutes(
       .from(invites)
       .where(eq(invites.id, id))
       .then((rows) => rows[0] ?? null);
-    if (!invite) throw notFound("Invite not found");
+    if (!invite) throw notFound("초대를 찾을 수 없습니다");
     if (invite.inviteType === "bootstrap_ceo") {
       await assertInstanceAdmin(req);
     } else {
@@ -2620,7 +2620,7 @@ export function accessRoutes(
         .from(invites)
         .where(eq(invites.id, existing.inviteId))
         .then((rows) => rows[0] ?? null);
-      if (!invite) throw notFound("Invite not found");
+      if (!invite) throw notFound("초대를 찾을 수 없습니다");
 
       let createdAgentId: string | null = existing.createdAgentId ?? null;
       if (existing.requestType === "human") {

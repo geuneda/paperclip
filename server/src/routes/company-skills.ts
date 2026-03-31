@@ -29,18 +29,18 @@ export function companySkillRoutes(db: Db) {
       if (req.actor.source === "local_implicit" || req.actor.isInstanceAdmin) return;
       const allowed = await access.canUser(companyId, req.actor.userId, "agents:create");
       if (!allowed) {
-        throw forbidden("Missing permission: agents:create");
+        throw forbidden("권한 부족: agents:create");
       }
       return;
     }
 
     if (!req.actor.agentId) {
-      throw forbidden("Agent authentication required");
+      throw forbidden("Agent 인증이 필요합니다");
     }
 
     const actorAgent = await agents.getById(req.actor.agentId);
     if (!actorAgent || actorAgent.companyId !== companyId) {
-      throw forbidden("Agent key cannot access another company");
+      throw forbidden("Agent 키로 다른 회사에 접근할 수 없습니다");
     }
 
     const allowedByGrant = await access.hasPermission(companyId, "agent", actorAgent.id, "agents:create");
@@ -48,7 +48,7 @@ export function companySkillRoutes(db: Db) {
       return;
     }
 
-    throw forbidden("Missing permission: can create agents");
+    throw forbidden("권한 부족: Agent 생성 권한이 없습니다");
   }
 
   router.get("/companies/:companyId/skills", async (req, res) => {
@@ -64,7 +64,7 @@ export function companySkillRoutes(db: Db) {
     assertCompanyAccess(req, companyId);
     const result = await svc.detail(companyId, skillId);
     if (!result) {
-      res.status(404).json({ error: "Skill not found" });
+      res.status(404).json({ error: "스킬을 찾을 수 없습니다" });
       return;
     }
     res.json(result);
@@ -76,7 +76,7 @@ export function companySkillRoutes(db: Db) {
     assertCompanyAccess(req, companyId);
     const result = await svc.updateStatus(companyId, skillId);
     if (!result) {
-      res.status(404).json({ error: "Skill not found" });
+      res.status(404).json({ error: "스킬을 찾을 수 없습니다" });
       return;
     }
     res.json(result);
@@ -89,7 +89,7 @@ export function companySkillRoutes(db: Db) {
     assertCompanyAccess(req, companyId);
     const result = await svc.readFile(companyId, skillId, relativePath);
     if (!result) {
-      res.status(404).json({ error: "Skill not found" });
+      res.status(404).json({ error: "스킬을 찾을 수 없습니다" });
       return;
     }
     res.json(result);
@@ -227,7 +227,7 @@ export function companySkillRoutes(db: Db) {
     await assertCanMutateCompanySkills(req, companyId);
     const result = await svc.deleteSkill(companyId, skillId);
     if (!result) {
-      res.status(404).json({ error: "Skill not found" });
+      res.status(404).json({ error: "스킬을 찾을 수 없습니다" });
       return;
     }
 
@@ -256,7 +256,7 @@ export function companySkillRoutes(db: Db) {
     await assertCanMutateCompanySkills(req, companyId);
     const result = await svc.installUpdate(companyId, skillId);
     if (!result) {
-      res.status(404).json({ error: "Skill not found" });
+      res.status(404).json({ error: "스킬을 찾을 수 없습니다" });
       return;
     }
 

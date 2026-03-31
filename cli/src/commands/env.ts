@@ -44,15 +44,15 @@ export async function envCommand(opts: { config?: string }): Promise<void> {
   let configReadError: string | null = null;
 
   if (configExists(opts.config)) {
-    p.log.message(pc.dim(`Config file: ${configPath}`));
+    p.log.message(pc.dim(`설정 파일: ${configPath}`));
     try {
       config = readConfig(opts.config);
     } catch (err) {
       configReadError = err instanceof Error ? err.message : String(err);
-      p.log.message(pc.yellow(`Could not parse config: ${configReadError}`));
+      p.log.message(pc.yellow(`설정을 파싱할 수 없습니다: ${configReadError}`));
     }
   } else {
-    p.log.message(pc.dim(`Config file missing: ${configPath}`));
+    p.log.message(pc.dim(`설정 파일 없음: ${configPath}`));
   }
 
   const rows = collectDeploymentEnvRows(config, configPath);
@@ -67,13 +67,13 @@ export async function envCommand(opts: { config?: string }): Promise<void> {
 
     p.log.message(pc.bold(title));
     for (const entry of entries) {
-      const status = entry.source === "missing" ? pc.red("missing") : entry.source === "default" ? pc.yellow("default") : pc.green("set");
+      const status = entry.source === "missing" ? pc.red("누락") : entry.source === "default" ? pc.yellow("기본값") : pc.green("설정됨");
       const sourceNote = {
-        env: "environment",
-        config: "config",
-        file: "file",
-        default: "default",
-        missing: "missing",
+        env: "환경 변수",
+        config: "설정 파일",
+        file: "파일",
+        default: "기본값",
+        missing: "누락",
       }[entry.source];
       p.log.message(
         `${pc.cyan(entry.key)} ${status.padEnd(7)} ${pc.dim(`[${sourceNote}] ${entry.note}`)}${entry.source === "missing" ? "" : ` ${pc.dim("=>")} ${pc.white(quoteShellValue(entry.value))}`}`,
@@ -81,32 +81,32 @@ export async function envCommand(opts: { config?: string }): Promise<void> {
     }
   };
 
-  formatSection("Required environment variables", requiredRows);
-  formatSection("Optional environment variables", optionalRows);
+  formatSection("필수 환경 변수", requiredRows);
+  formatSection("선택 환경 변수", optionalRows);
 
   const exportRows = rows.map((row) => (row.source === "missing" ? { ...row, value: "<set-this-value>" } : row));
   const uniqueRows = uniqueByKey(exportRows);
   const exportBlock = uniqueRows.map((row) => `export ${row.key}=${quoteShellValue(row.value)}`).join("\n");
 
   if (configReadError) {
-    p.log.error(`Could not load config cleanly: ${configReadError}`);
+    p.log.error(`설정을 정상적으로 로드할 수 없습니다: ${configReadError}`);
   }
 
   p.note(
-    exportBlock || "No values detected. Set required variables manually.",
-    "Deployment export block",
+    exportBlock || "감지된 값이 없습니다. 필수 변수를 수동으로 설정하세요.",
+    "배포 환경 변수 블록",
   );
 
   if (missingRequired.length > 0) {
     p.log.message(
       pc.yellow(
-        `Missing required values: ${missingRequired.map((row) => row.key).join(", ")}. Set these before deployment.`,
+        `누락된 필수 값: ${missingRequired.map((row) => row.key).join(", ")}. 배포 전에 설정하세요.`,
       ),
     );
   } else {
-    p.log.message(pc.green("All required deployment variables are present."));
+    p.log.message(pc.green("모든 필수 배포 변수가 설정되어 있습니다."));
   }
-  p.outro("Done");
+  p.outro("완료");
 }
 
 function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: string): EnvVarRow[] {
@@ -191,10 +191,10 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
       required: true,
       note:
         jwtSource === "missing"
-          ? "Generate during onboard or set manually (required for local adapter authentication)"
+          ? "onboard 중 생성하거나 수동 설정 필요 (로컬 Adapter 인증에 필수)"
           : jwtSource === "env"
-            ? "Set in process environment"
-            : `Set in ${agentJwtEnvFile}`,
+            ? "프로세스 환경에 설정됨"
+            : `${agentJwtEnvFile}에 설정됨`,
     },
     {
       key: "DATABASE_URL",
@@ -203,8 +203,8 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
       required: true,
       note:
         databaseMode === "postgres"
-          ? "Configured for postgres mode (required)"
-          : "Required for live deployment with managed PostgreSQL",
+          ? "PostgreSQL 모드로 설정됨 (필수)"
+          : "관리형 PostgreSQL을 사용한 실서비스 배포에 필수",
     },
     {
       key: "PORT",
@@ -213,14 +213,14 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
         (config?.server?.port !== undefined ? String(config.server.port) : "3100"),
       source: process.env.PORT ? "env" : config?.server?.port !== undefined ? "config" : "default",
       required: false,
-      note: "HTTP listen port",
+      note: "HTTP 리슨 포트",
     },
     {
       key: "PAPERCLIP_PUBLIC_URL",
       value: publicUrl,
       source: publicUrlSource,
       required: false,
-      note: "Canonical public URL for auth/callback/invite origin wiring",
+      note: "인증/콜백/초대 원본 연결을 위한 공개 URL",
     },
     {
       key: "BETTER_AUTH_TRUSTED_ORIGINS",
@@ -231,42 +231,42 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "default"
           : "missing",
       required: false,
-      note: "Comma-separated auth origin allowlist (auto-derived from PAPERCLIP_PUBLIC_URL when possible)",
+      note: "쉼표로 구분된 인증 원본 허용 목록 (가능한 경우 PAPERCLIP_PUBLIC_URL에서 자동 파생)",
     },
     {
       key: "PAPERCLIP_AGENT_JWT_TTL_SECONDS",
       value: process.env.PAPERCLIP_AGENT_JWT_TTL_SECONDS ?? DEFAULT_AGENT_JWT_TTL_SECONDS,
       source: process.env.PAPERCLIP_AGENT_JWT_TTL_SECONDS ? "env" : "default",
       required: false,
-      note: "JWT lifetime in seconds",
+      note: "JWT 유효 시간 (초)",
     },
     {
       key: "PAPERCLIP_AGENT_JWT_ISSUER",
       value: process.env.PAPERCLIP_AGENT_JWT_ISSUER ?? DEFAULT_AGENT_JWT_ISSUER,
       source: process.env.PAPERCLIP_AGENT_JWT_ISSUER ? "env" : "default",
       required: false,
-      note: "JWT issuer",
+      note: "JWT 발급자",
     },
     {
       key: "PAPERCLIP_AGENT_JWT_AUDIENCE",
       value: process.env.PAPERCLIP_AGENT_JWT_AUDIENCE ?? DEFAULT_AGENT_JWT_AUDIENCE,
       source: process.env.PAPERCLIP_AGENT_JWT_AUDIENCE ? "env" : "default",
       required: false,
-      note: "JWT audience",
+      note: "JWT 대상",
     },
     {
       key: "HEARTBEAT_SCHEDULER_INTERVAL_MS",
       value: heartbeatInterval,
       source: process.env.HEARTBEAT_SCHEDULER_INTERVAL_MS ? "env" : "default",
       required: false,
-      note: "Heartbeat worker interval in ms",
+      note: "Heartbeat 워커 간격 (ms)",
     },
     {
       key: "HEARTBEAT_SCHEDULER_ENABLED",
       value: heartbeatEnabled,
       source: process.env.HEARTBEAT_SCHEDULER_ENABLED ? "env" : "default",
       required: false,
-      note: "Set to `false` to disable timer scheduling",
+      note: "타이머 스케줄링을 비활성화하려면 `false`로 설정",
     },
     {
       key: "PAPERCLIP_SECRETS_PROVIDER",
@@ -277,7 +277,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Default provider for new secrets",
+      note: "새 시크릿의 기본 제공자",
     },
     {
       key: "PAPERCLIP_SECRETS_STRICT_MODE",
@@ -288,7 +288,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Require secret refs for sensitive env keys",
+      note: "민감한 환경 변수 키에 시크릿 참조 필수 여부",
     },
     {
       key: "PAPERCLIP_SECRETS_MASTER_KEY_FILE",
@@ -299,7 +299,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Path to local encrypted secrets key file",
+      note: "로컬 암호화 시크릿 키 파일 경로",
     },
     {
       key: "PAPERCLIP_STORAGE_PROVIDER",
@@ -310,7 +310,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Storage provider (local_disk or s3)",
+      note: "스토리지 제공자 (local_disk 또는 s3)",
     },
     {
       key: "PAPERCLIP_STORAGE_LOCAL_DIR",
@@ -321,7 +321,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Local storage base directory for local_disk provider",
+      note: "local_disk 제공자의 로컬 스토리지 기본 디렉토리",
     },
     {
       key: "PAPERCLIP_STORAGE_S3_BUCKET",
@@ -332,7 +332,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "S3 bucket name for s3 provider",
+      note: "S3 제공자의 버킷 이름",
     },
     {
       key: "PAPERCLIP_STORAGE_S3_REGION",
@@ -343,7 +343,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "S3 region for s3 provider",
+      note: "S3 제공자의 리전",
     },
     {
       key: "PAPERCLIP_STORAGE_S3_ENDPOINT",
@@ -354,7 +354,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Optional custom endpoint for S3-compatible providers",
+      note: "S3 호환 제공자를 위한 선택적 커스텀 엔드포인트",
     },
     {
       key: "PAPERCLIP_STORAGE_S3_PREFIX",
@@ -365,7 +365,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Optional object key prefix",
+      note: "선택적 오브젝트 키 접두사",
     },
     {
       key: "PAPERCLIP_STORAGE_S3_FORCE_PATH_STYLE",
@@ -376,7 +376,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
           ? "config"
           : "default",
       required: false,
-      note: "Set true for path-style access on compatible providers",
+      note: "호환 제공자에서 경로 스타일 접근 시 true로 설정",
     },
   ];
 
@@ -387,7 +387,7 @@ function collectDeploymentEnvRows(config: PaperclipConfig | null, configPath: st
       value: process.env.PAPERCLIP_CONFIG ?? configPath,
       source: process.env.PAPERCLIP_CONFIG ? "env" : "default",
       required: false,
-      note: "Optional path override for config file",
+      note: "설정 파일의 선택적 경로 오버라이드",
     });
   }
 

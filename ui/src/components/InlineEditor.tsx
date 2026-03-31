@@ -192,12 +192,12 @@ export function InlineEditor({
             )}
           >
             {autosaveState === "saving"
-              ? "Autosaving..."
+              ? "자동저장 중..."
               : autosaveState === "saved"
-                ? "Saved"
+                ? "저장됨"
                 : autosaveState === "error"
-                  ? "Could not save"
-                  : "Idle"}
+                  ? "저장 실패"
+                  : ""}
           </span>
         </div>
       </div>

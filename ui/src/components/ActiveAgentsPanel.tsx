@@ -148,7 +148,7 @@ function AgentRunCard({
           streaming={isActive}
           collapseStdout
           thinkingClassName="!text-[10px] !leading-4"
-          emptyMessage={hasOutput ? "Waiting for transcript parsing..." : isActive ? "Waiting for output..." : "No transcript captured."}
+          emptyMessage={hasOutput ? "트랜스크립트 파싱 대기 중..." : isActive ? "출력 대기 중..." : "캡처된 트랜스크립트가 없습니다."}
         />
       </div>
     </div>

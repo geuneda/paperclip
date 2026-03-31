@@ -26,39 +26,39 @@ export async function promptStorage(current?: StorageConfig): Promise<StorageCon
   const base = current ?? defaultStorageConfig();
 
   const provider = await p.select({
-    message: "Storage provider",
+    message: "스토리지 제공자",
     options: [
       {
         value: "local_disk" as const,
-        label: "Local disk (recommended)",
-        hint: "best for single-user local deployments",
+        label: "로컬 디스크 (권장)",
+        hint: "단일 사용자 로컬 배포에 최적",
       },
       {
         value: "s3" as const,
-        label: "S3 compatible",
-        hint: "for cloud/object storage backends",
+        label: "S3 호환",
+        hint: "클라우드/오브젝트 스토리지 백엔드용",
       },
     ],
     initialValue: base.provider,
   });
 
   if (p.isCancel(provider)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   if (provider === "local_disk") {
     const baseDir = await p.text({
-      message: "Local storage base directory",
+      message: "로컬 스토리지 기본 디렉토리",
       defaultValue: base.localDisk.baseDir || defaultStorageBaseDir(),
       placeholder: defaultStorageBaseDir(),
       validate: (value) => {
-        if (!value || value.trim().length === 0) return "Storage base directory is required";
+        if (!value || value.trim().length === 0) return "스토리지 기본 디렉토리는 필수입니다";
       },
     });
 
     if (p.isCancel(baseDir)) {
-      p.cancel("Setup cancelled.");
+      p.cancel("설정이 취소되었습니다.");
       process.exit(0);
     }
 
@@ -72,62 +72,62 @@ export async function promptStorage(current?: StorageConfig): Promise<StorageCon
   }
 
   const bucket = await p.text({
-    message: "S3 bucket",
+    message: "S3 버킷",
     defaultValue: base.s3.bucket || "paperclip",
     placeholder: "paperclip",
     validate: (value) => {
-      if (!value || value.trim().length === 0) return "Bucket is required";
+      if (!value || value.trim().length === 0) return "버킷은 필수입니다";
     },
   });
 
   if (p.isCancel(bucket)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   const region = await p.text({
-    message: "S3 region",
+    message: "S3 리전",
     defaultValue: base.s3.region || "us-east-1",
     placeholder: "us-east-1",
     validate: (value) => {
-      if (!value || value.trim().length === 0) return "Region is required";
+      if (!value || value.trim().length === 0) return "리전은 필수입니다";
     },
   });
 
   if (p.isCancel(region)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   const endpoint = await p.text({
-    message: "S3 endpoint (optional for compatible backends)",
+    message: "S3 엔드포인트 (호환 백엔드용, 선택 사항)",
     defaultValue: base.s3.endpoint ?? "",
     placeholder: "https://s3.amazonaws.com",
   });
 
   if (p.isCancel(endpoint)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   const prefix = await p.text({
-    message: "Object key prefix (optional)",
+    message: "오브젝트 키 접두사 (선택 사항)",
     defaultValue: base.s3.prefix ?? "",
     placeholder: "paperclip/",
   });
 
   if (p.isCancel(prefix)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   const forcePathStyle = await p.confirm({
-    message: "Use S3 path-style URLs?",
+    message: "S3 경로 스타일 URL을 사용하시겠습니까?",
     initialValue: base.s3.forcePathStyle ?? false,
   });
 
   if (p.isCancel(forcePathStyle)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 

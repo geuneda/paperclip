@@ -51,16 +51,16 @@ export async function runCommand(opts: RunOptions): Promise<void> {
 
   if (!configExists(configPath)) {
     if (!process.stdin.isTTY || !process.stdout.isTTY) {
-      p.log.error("No config found and terminal is non-interactive.");
-      p.log.message(`Run ${pc.cyan("paperclipai onboard")} once, then retry ${pc.cyan("paperclipai run")}.`);
+      p.log.error("설정 파일이 없고 터미널이 비대화형입니다.");
+      p.log.message(`${pc.cyan("paperclipai onboard")}를 먼저 실행한 후 ${pc.cyan("paperclipai run")}을 다시 시도하세요.`);
       process.exit(1);
     }
 
-    p.log.step("No config found. Starting onboarding...");
+    p.log.step("설정 파일이 없습니다. 초기 설정을 시작합니다...");
     await onboard({ config: configPath, invokedByRun: true });
   }
 
-  p.log.step("Running doctor checks...");
+  p.log.step("doctor 검사 실행 중...");
   const summary = await doctor({
     config: configPath,
     repair: opts.repair ?? true,
@@ -68,21 +68,21 @@ export async function runCommand(opts: RunOptions): Promise<void> {
   });
 
   if (summary.failed > 0) {
-    p.log.error("Doctor found blocking issues. Not starting server.");
+    p.log.error("doctor 검사에서 차단 문제가 발견되었습니다. 서버를 시작하지 않습니다.");
     process.exit(1);
   }
 
   const config = readConfig(configPath);
   if (!config) {
-    p.log.error(`No config found at ${configPath}.`);
+    p.log.error(`${configPath}에서 설정 파일을 찾을 수 없습니다.`);
     process.exit(1);
   }
 
-  p.log.step("Starting Paperclip server...");
+  p.log.step("Paperclip 서버 시작 중...");
   const startedServer = await importServerEntry();
 
   if (shouldGenerateBootstrapInviteAfterStart(config)) {
-    p.log.step("Generating bootstrap CEO invite");
+    p.log.step("부트스트랩 CEO 초대 생성 중");
     await bootstrapCeoInvite({
       config: configPath,
       dbUrl: startedServer.databaseUrl,
@@ -165,13 +165,13 @@ async function importServerEntry(): Promise<StartedServer> {
     const missingServerEntrypoint = !missingSpecifier || missingSpecifier === "@paperclipai/server";
     if (isModuleNotFoundError(err) && missingServerEntrypoint) {
       throw new Error(
-        `Could not locate a Paperclip server entrypoint.\n` +
-          `Tried: ${devEntry}, @paperclipai/server\n` +
+        `Paperclip 서버 진입점을 찾을 수 없습니다.\n` +
+          `시도한 경로: ${devEntry}, @paperclipai/server\n` +
           `${formatError(err)}`,
       );
     }
     throw new Error(
-      `Paperclip server failed to start.\n` +
+      `Paperclip 서버를 시작하지 못했습니다.\n` +
         `${formatError(err)}`,
     );
   }
@@ -184,7 +184,7 @@ function shouldGenerateBootstrapInviteAfterStart(config: PaperclipConfig): boole
 async function startServerFromModule(mod: unknown, label: string): Promise<StartedServer> {
   const startServer = (mod as { startServer?: () => Promise<StartedServer> }).startServer;
   if (typeof startServer !== "function") {
-    throw new Error(`Paperclip server entrypoint did not export startServer(): ${label}`);
+    throw new Error(`Paperclip 서버 진입점에서 startServer()를 내보내지 않았습니다: ${label}`);
   }
   return await startServer();
 }

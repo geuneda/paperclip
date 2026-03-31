@@ -146,14 +146,14 @@ export function printStartupBanner(opts: StartupBannerOptions): void {
     "",
     ...art,
     color("  ───────────────────────────────────────────────────────", "blue"),
-    row("Mode", `${dbMode}  |  ${uiMode}`),
-    row("Deploy", `${opts.deploymentMode} (${opts.deploymentExposure})`),
-    row("Auth", opts.authReady ? color("ready", "green") : color("not-ready", "yellow")),
-    row("Server", portValue),
+    row("모드", `${dbMode}  |  ${uiMode}`),
+    row("배포", `${opts.deploymentMode} (${opts.deploymentExposure})`),
+    row("인증", opts.authReady ? color("ready", "green") : color("not-ready", "yellow")),
+    row("서버", portValue),
     row("API", `${apiUrl} ${color(`(health: ${apiUrl}/health)`, "dim")}`),
     row("UI", uiUrl),
-    row("Database", dbDetails),
-    row("Migrations", opts.migrationSummary),
+    row("데이터베이스", dbDetails),
+    row("마이그레이션", opts.migrationSummary),
     row(
       "Agent JWT",
       agentJwtSecret.status === "pass"
@@ -161,9 +161,9 @@ export function printStartupBanner(opts: StartupBannerOptions): void {
         : color(agentJwtSecret.message, "yellow"),
     ),
     row("Heartbeat", heartbeat),
-    row("DB Backup", dbBackup),
-    row("Backup Dir", opts.databaseBackupDir),
-    row("Config", configPath),
+    row("DB 백업", dbBackup),
+    row("백업 경로", opts.databaseBackupDir),
+    row("설정", configPath),
     agentJwtSecret.status === "warn"
       ? color("  ───────────────────────────────────────────────────────", "yellow")
       : null,

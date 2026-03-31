@@ -37,7 +37,7 @@ export function executionWorkspaceRoutes(db: Db) {
     const id = req.params.id as string;
     const workspace = await svc.getById(id);
     if (!workspace) {
-      res.status(404).json({ error: "Execution workspace not found" });
+      res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, workspace.companyId);
@@ -48,13 +48,13 @@ export function executionWorkspaceRoutes(db: Db) {
     const id = req.params.id as string;
     const workspace = await svc.getById(id);
     if (!workspace) {
-      res.status(404).json({ error: "Execution workspace not found" });
+      res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, workspace.companyId);
     const readiness = await svc.getCloseReadiness(id);
     if (!readiness) {
-      res.status(404).json({ error: "Execution workspace not found" });
+      res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
       return;
     }
     res.json(readiness);
@@ -64,7 +64,7 @@ export function executionWorkspaceRoutes(db: Db) {
     const id = req.params.id as string;
     const workspace = await svc.getById(id);
     if (!workspace) {
-      res.status(404).json({ error: "Execution workspace not found" });
+      res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, workspace.companyId);
@@ -76,20 +76,20 @@ export function executionWorkspaceRoutes(db: Db) {
     const id = req.params.id as string;
     const action = String(req.params.action ?? "").trim().toLowerCase();
     if (action !== "start" && action !== "stop" && action !== "restart") {
-      res.status(404).json({ error: "Runtime service action not found" });
+      res.status(404).json({ error: "런타임 서비스 작업을 찾을 수 없습니다" });
       return;
     }
 
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Execution workspace not found" });
+      res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
 
     const workspaceCwd = existing.cwd;
     if (!workspaceCwd) {
-      res.status(422).json({ error: "Execution workspace needs a local path before Paperclip can manage local runtime services" });
+      res.status(422).json({ error: "로컬 런타임 서비스를 관리하려면 Execution Workspace에 로컬 경로가 필요합니다" });
       return;
     }
 
@@ -118,7 +118,7 @@ export function executionWorkspaceRoutes(db: Db) {
     const effectiveRuntimeConfig = existing.config?.workspaceRuntime ?? projectWorkspaceRuntime ?? null;
 
     if ((action === "start" || action === "restart") && !effectiveRuntimeConfig) {
-      res.status(422).json({ error: "Execution workspace has no runtime service configuration or inherited project workspace default" });
+      res.status(422).json({ error: "Execution Workspace에 런타임 서비스 설정이 없거나 상위 Project Workspace 기본값을 상속받지 않았습니다" });
       return;
     }
 
@@ -216,7 +216,7 @@ export function executionWorkspaceRoutes(db: Db) {
 
     const workspace = await svc.getById(id);
     if (!workspace) {
-      res.status(404).json({ error: "Execution workspace not found" });
+      res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
       return;
     }
 
@@ -244,7 +244,7 @@ export function executionWorkspaceRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Execution workspace not found" });
+      res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
@@ -278,13 +278,13 @@ export function executionWorkspaceRoutes(db: Db) {
     if (req.body.status === "archived" && existing.status !== "archived") {
       const readiness = await svc.getCloseReadiness(existing.id);
       if (!readiness) {
-        res.status(404).json({ error: "Execution workspace not found" });
+        res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
         return;
       }
 
       if (readiness.state === "blocked") {
         res.status(409).json({
-          error: readiness.blockingReasons[0] ?? "Execution workspace cannot be closed right now",
+          error: readiness.blockingReasons[0] ?? "현재 Execution Workspace를 닫을 수 없습니다",
           closeReadiness: readiness,
         });
         return;
@@ -298,7 +298,7 @@ export function executionWorkspaceRoutes(db: Db) {
         cleanupReason: null,
       });
       if (!archivedWorkspace) {
-        res.status(404).json({ error: "Execution workspace not found" });
+        res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
         return;
       }
       workspace = archivedWorkspace;
@@ -385,7 +385,7 @@ export function executionWorkspaceRoutes(db: Db) {
     } else {
       const updatedWorkspace = await svc.update(id, patch);
       if (!updatedWorkspace) {
-        res.status(404).json({ error: "Execution workspace not found" });
+        res.status(404).json({ error: "Execution Workspace를 찾을 수 없습니다" });
         return;
       }
       workspace = updatedWorkspace;

@@ -20,28 +20,28 @@ const platforms: { id: Platform; label: string; icon: typeof Apple }[] = [
 const instructions: Record<Platform, { steps: string[]; tip?: string }> = {
   mac: {
     steps: [
-      "Open Finder and navigate to the folder.",
-      "Right-click (or Control-click) the folder.",
-      "Hold the Option (⌥) key — \"Copy\" changes to \"Copy as Pathname\".",
-      "Click \"Copy as Pathname\", then paste here.",
+      "Finder를 열고 폴더로 이동합니다.",
+      "폴더를 우클릭(또는 Control-클릭)합니다.",
+      "Option(⌥) 키를 누르면 \"복사\"가 \"경로명 복사\"로 변경됩니다.",
+      "\"경로명 복사\"를 클릭한 후 여기에 붙여넣으세요.",
     ],
-    tip: "You can also open Terminal, type cd, drag the folder into the terminal window, and press Enter. Then type pwd to see the full path.",
+    tip: "터미널을 열고 cd를 입력한 후 폴더를 터미널 창으로 드래그하고 Enter를 누를 수도 있습니다. 그런 다음 pwd를 입력하여 전체 경로를 확인하세요.",
   },
   windows: {
     steps: [
-      "Open File Explorer and navigate to the folder.",
-      "Click in the address bar at the top — the full path will appear.",
-      "Copy the path, then paste here.",
+      "파일 탐색기를 열고 폴더로 이동합니다.",
+      "상단 주소 표시줄을 클릭하면 전체 경로가 나타납니다.",
+      "경로를 복사한 후 여기에 붙여넣으세요.",
     ],
-    tip: "Alternatively, hold Shift and right-click the folder, then select \"Copy as path\".",
+    tip: "또는 Shift를 누른 채 폴더를 우클릭한 후 \"경로로 복사\"를 선택하세요.",
   },
   linux: {
     steps: [
-      "Open a terminal and navigate to the directory with cd.",
-      "Run pwd to print the full path.",
-      "Copy the output and paste here.",
+      "터미널을 열고 cd로 디렉터리로 이동합니다.",
+      "pwd를 실행하여 전체 경로를 출력합니다.",
+      "출력을 복사한 후 여기에 붙여넣으세요.",
     ],
-    tip: "In most file managers, Ctrl+L reveals the full path in the address bar.",
+    tip: "대부분의 파일 관리자에서 Ctrl+L을 누르면 주소 표시줄에 전체 경로가 표시됩니다.",
   },
 };
 
@@ -69,11 +69,11 @@ export function PathInstructionsModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-base">How to get a full path</DialogTitle>
+          <DialogTitle className="text-base">전체 경로를 얻는 방법</DialogTitle>
           <DialogDescription>
-            Paste the absolute path (e.g.{" "}
+            절대 경로(예:{" "}
             <code className="text-xs bg-muted px-1 py-0.5 rounded">/Users/you/project</code>
-            ) into the input field.
+            )를 입력란에 붙여넣으세요.
           </DialogDescription>
         </DialogHeader>
 
@@ -135,7 +135,7 @@ export function ChoosePathButton({ className }: { className?: string }) {
         )}
         onClick={() => setOpen(true)}
       >
-        Choose
+        선택
       </button>
       <PathInstructionsModal open={open} onOpenChange={setOpen} />
     </>

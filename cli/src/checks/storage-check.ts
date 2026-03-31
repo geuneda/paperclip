@@ -13,17 +13,17 @@ export function storageCheck(config: PaperclipConfig, configPath?: string): Chec
     try {
       fs.accessSync(baseDir, fs.constants.W_OK);
       return {
-        name: "Storage",
+        name: "스토리지",
         status: "pass",
-        message: `Local disk storage is writable: ${baseDir}`,
+        message: `로컬 디스크 스토리지에 쓰기 가능: ${baseDir}`,
       };
     } catch {
       return {
-        name: "Storage",
+        name: "스토리지",
         status: "fail",
-        message: `Local storage directory is not writable: ${baseDir}`,
+        message: `로컬 스토리지 디렉토리에 쓸 수 없습니다: ${baseDir}`,
         canRepair: false,
-        repairHint: "Check file permissions for storage.localDisk.baseDir",
+        repairHint: "storage.localDisk.baseDir의 파일 권한을 확인하세요",
       };
     }
   }
@@ -32,20 +32,20 @@ export function storageCheck(config: PaperclipConfig, configPath?: string): Chec
   const region = config.storage.s3.region.trim();
   if (!bucket || !region) {
     return {
-      name: "Storage",
+      name: "스토리지",
       status: "fail",
-      message: "S3 storage requires non-empty bucket and region",
+      message: "S3 스토리지에는 비어있지 않은 버킷과 리전이 필요합니다",
       canRepair: false,
-      repairHint: "Run `paperclipai configure --section storage`",
+      repairHint: "`paperclipai configure --section storage`를 실행하세요",
     };
   }
 
   return {
-    name: "Storage",
+    name: "스토리지",
     status: "warn",
-    message: `S3 storage configured (bucket=${bucket}, region=${region}). Reachability check is skipped in doctor.`,
+    message: `S3 스토리지 설정됨 (bucket=${bucket}, region=${region}). doctor에서 연결 가능성 검사는 생략됩니다.`,
     canRepair: false,
-    repairHint: "Verify credentials and endpoint in deployment environment",
+    repairHint: "배포 환경에서 자격 증명과 엔드포인트를 확인하세요",
   };
 }
 

@@ -33,8 +33,8 @@ export function InstanceSettings() {
 
   useEffect(() => {
     setBreadcrumbs([
-      { label: "Instance Settings" },
-      { label: "Heartbeats" },
+      { label: "인스턴스 설정" },
+      { label: "Heartbeat" },
     ]);
   }, [setBreadcrumbs]);
 
@@ -73,7 +73,7 @@ export function InstanceSettings() {
       ]);
     },
     onError: (error) => {
-      setActionError(error instanceof Error ? error.message : "Failed to update heartbeat.");
+      setActionError(error instanceof Error ? error.message : "Heartbeat 업데이트에 실패했습니다.");
     },
   });
 
@@ -106,8 +106,8 @@ export function InstanceSettings() {
         const detail = firstError instanceof Error ? firstError.message : "Unknown error";
         throw new Error(
           failures.length === 1
-            ? `Failed to disable 1 timer heartbeat: ${detail}`
-            : `Failed to disable ${failures.length} of ${enabled.length} timer heartbeats. First error: ${detail}`,
+            ? `타이머 Heartbeat 1개 비활성화 실패: ${detail}`
+            : `타이머 Heartbeat ${enabled.length}개 중 ${failures.length}개 비활성화 실패. 첫 번째 오류: ${detail}`,
         );
       }
       return enabled;
@@ -126,7 +126,7 @@ export function InstanceSettings() {
       ]);
     },
     onError: (error) => {
-      setActionError(error instanceof Error ? error.message : "Failed to disable all heartbeats.");
+      setActionError(error instanceof Error ? error.message : "모든 Heartbeat 비활성화에 실패했습니다.");
     },
   });
 
@@ -150,7 +150,7 @@ export function InstanceSettings() {
   }, [agents]);
 
   if (heartbeatsQuery.isLoading) {
-    return <div className="text-sm text-muted-foreground">Loading scheduler heartbeats...</div>;
+    return <div className="text-sm text-muted-foreground">스케줄러 Heartbeat를 불러오는 중...</div>;
   }
 
   if (heartbeatsQuery.error) {
@@ -158,7 +158,7 @@ export function InstanceSettings() {
       <div className="text-sm text-destructive">
         {heartbeatsQuery.error instanceof Error
           ? heartbeatsQuery.error.message
-          : "Failed to load scheduler heartbeats."}
+          : "스케줄러 Heartbeat를 불러오는 데 실패했습니다."}
       </div>
     );
   }
@@ -168,17 +168,17 @@ export function InstanceSettings() {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-lg font-semibold">Scheduler Heartbeats</h1>
+          <h1 className="text-lg font-semibold">스케줄러 Heartbeat</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Agents with a timer heartbeat enabled across all of your companies.
+          모든 회사에서 타이머 Heartbeat가 활성화된 Agent 목록입니다.
         </p>
       </div>
 
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <span><span className="font-semibold text-foreground">{activeCount}</span> active</span>
-        <span><span className="font-semibold text-foreground">{disabledCount}</span> disabled</span>
-        <span><span className="font-semibold text-foreground">{grouped.length}</span> {grouped.length === 1 ? "company" : "companies"}</span>
+        <span><span className="font-semibold text-foreground">{activeCount}</span> 활성</span>
+        <span><span className="font-semibold text-foreground">{disabledCount}</span> 비활성</span>
+        <span><span className="font-semibold text-foreground">{grouped.length}</span> 회사</span>
         {anyEnabled && (
           <Button
             variant="destructive"
@@ -186,14 +186,13 @@ export function InstanceSettings() {
             className="ml-auto h-7 text-xs"
             disabled={disableAllMutation.isPending}
             onClick={() => {
-              const noun = enabledCount === 1 ? "agent" : "agents";
-              if (!window.confirm(`Disable timer heartbeats for all ${enabledCount} enabled ${noun}?`)) {
+              if (!window.confirm(`활성화된 Agent ${enabledCount}개의 타이머 Heartbeat를 모두 비활성화하시겠습니까?`)) {
                 return;
               }
               disableAllMutation.mutate(agents);
             }}
           >
-            {disableAllMutation.isPending ? "Disabling..." : "Disable All"}
+            {disableAllMutation.isPending ? "비활성화 중..." : "모두 비활성화"}
           </Button>
         )}
       </div>
@@ -207,7 +206,7 @@ export function InstanceSettings() {
       {agents.length === 0 ? (
         <EmptyState
           icon={Clock3}
-          message="No scheduler heartbeats match the current criteria."
+          message="현재 조건에 맞는 스케줄러 Heartbeat가 없습니다."
         />
       ) : (
         <div className="space-y-4">
@@ -255,7 +254,7 @@ export function InstanceSettings() {
                           <Link
                             to={buildAgentHref(agent)}
                             className="text-muted-foreground hover:text-foreground"
-                            title="Full agent config"
+                            title="Agent 전체 설정"
                           >
                             <ExternalLink className="h-3.5 w-3.5" />
                           </Link>
@@ -266,7 +265,7 @@ export function InstanceSettings() {
                             disabled={saving}
                             onClick={() => toggleMutation.mutate(agent)}
                           >
-                            {saving ? "..." : agent.heartbeatEnabled ? "Disable Timer Heartbeat" : "Enable Timer Heartbeat"}
+                            {saving ? "..." : agent.heartbeatEnabled ? "타이머 Heartbeat 비활성화" : "타이머 Heartbeat 활성화"}
                           </Button>
                         </span>
                       </div>

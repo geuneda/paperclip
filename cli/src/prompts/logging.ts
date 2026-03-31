@@ -5,33 +5,33 @@ import { resolveDefaultLogsDir, resolvePaperclipInstanceId } from "../config/hom
 export async function promptLogging(): Promise<LoggingConfig> {
   const defaultLogDir = resolveDefaultLogsDir(resolvePaperclipInstanceId());
   const mode = await p.select({
-    message: "Logging mode",
+    message: "로깅 모드",
     options: [
-      { value: "file" as const, label: "File-based logging", hint: "recommended" },
-      { value: "cloud" as const, label: "Cloud logging", hint: "coming soon" },
+      { value: "file" as const, label: "파일 기반 로깅", hint: "권장" },
+      { value: "cloud" as const, label: "클라우드 로깅", hint: "출시 예정" },
     ],
   });
 
   if (p.isCancel(mode)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   if (mode === "file") {
     const logDir = await p.text({
-      message: "Log directory",
+      message: "로그 디렉토리",
       defaultValue: defaultLogDir,
       placeholder: defaultLogDir,
     });
 
     if (p.isCancel(logDir)) {
-      p.cancel("Setup cancelled.");
+      p.cancel("설정이 취소되었습니다.");
       process.exit(0);
     }
 
     return { mode: "file", logDir: logDir || defaultLogDir };
   }
 
-  p.note("Cloud logging is coming soon. Using file-based logging for now.");
+  p.note("클라우드 로깅은 곧 출시됩니다. 현재는 파일 기반 로깅을 사용합니다.");
   return { mode: "file", logDir: defaultLogDir };
 }

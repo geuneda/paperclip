@@ -20,7 +20,7 @@ export function goalRoutes(db: Db) {
     const id = req.params.id as string;
     const goal = await svc.getById(id);
     if (!goal) {
-      res.status(404).json({ error: "Goal not found" });
+      res.status(404).json({ error: "Goal을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, goal.companyId);
@@ -49,13 +49,13 @@ export function goalRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Goal not found" });
+      res.status(404).json({ error: "Goal을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
     const goal = await svc.update(id, req.body);
     if (!goal) {
-      res.status(404).json({ error: "Goal not found" });
+      res.status(404).json({ error: "Goal을 찾을 수 없습니다" });
       return;
     }
 
@@ -78,13 +78,13 @@ export function goalRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Goal not found" });
+      res.status(404).json({ error: "Goal을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
     const goal = await svc.remove(id);
     if (!goal) {
-      res.status(404).json({ error: "Goal not found" });
+      res.status(404).json({ error: "Goal을 찾을 수 없습니다" });
       return;
     }
 

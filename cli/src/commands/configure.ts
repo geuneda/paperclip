@@ -20,11 +20,11 @@ import { printPaperclipCliBanner } from "../utils/banner.js";
 type Section = "llm" | "database" | "logging" | "server" | "storage" | "secrets";
 
 const SECTION_LABELS: Record<Section, string> = {
-  llm: "LLM Provider",
-  database: "Database",
-  logging: "Logging",
-  server: "Server",
-  storage: "Storage",
+  llm: "LLM 제공자",
+  database: "데이터베이스",
+  logging: "로깅",
+  server: "서버",
+  storage: "스토리지",
   secrets: "Secrets",
 };
 
@@ -77,7 +77,7 @@ export async function configure(opts: {
   const configPath = resolveConfigPath(opts.config);
 
   if (!configExists(opts.config)) {
-    p.log.error("No config file found. Run `paperclipai onboard` first.");
+    p.log.error("설정 파일을 찾을 수 없습니다. 먼저 `paperclipai onboard`를 실행하세요.");
     p.outro("");
     return;
   }
@@ -88,7 +88,7 @@ export async function configure(opts: {
   } catch (err) {
     p.log.message(
       pc.yellow(
-        `Existing config is invalid. Loading defaults so you can repair it now.\n${err instanceof Error ? err.message : String(err)}`,
+        `기존 설정이 유효하지 않습니다. 지금 수정할 수 있도록 기본값을 로드합니다.\n${err instanceof Error ? err.message : String(err)}`,
       ),
     );
     config = defaultConfig();
@@ -97,7 +97,7 @@ export async function configure(opts: {
   let section: Section | undefined = opts.section as Section | undefined;
 
   if (section && !SECTION_LABELS[section]) {
-    p.log.error(`Unknown section: ${section}. Choose from: ${Object.keys(SECTION_LABELS).join(", ")}`);
+    p.log.error(`알 수 없는 섹션: ${section}. 다음 중에서 선택하세요: ${Object.keys(SECTION_LABELS).join(", ")}`);
     p.outro("");
     return;
   }
@@ -107,7 +107,7 @@ export async function configure(opts: {
   while (continueLoop) {
     if (!section) {
       const choice = await p.select({
-        message: "Which section do you want to configure?",
+        message: "어떤 섹션을 설정하시겠습니까?",
         options: Object.entries(SECTION_LABELS).map(([value, label]) => ({
           value: value as Section,
           label,
@@ -115,7 +115,7 @@ export async function configure(opts: {
       });
 
       if (p.isCancel(choice)) {
-        p.cancel("Configuration cancelled.");
+        p.cancel("설정이 취소되었습니다.");
         return;
       }
 
@@ -158,13 +158,13 @@ export async function configure(opts: {
         {
           const keyResult = ensureLocalSecretsKeyFile(config, configPath);
           if (keyResult.status === "created") {
-            p.log.success(`Created local secrets key file at ${pc.dim(keyResult.path)}`);
+            p.log.success(`${pc.dim(keyResult.path)}에 로컬 시크릿 키 파일을 생성했습니다`);
           } else if (keyResult.status === "existing") {
-            p.log.message(pc.dim(`Using existing local secrets key file at ${keyResult.path}`));
+            p.log.message(pc.dim(`${keyResult.path}의 기존 로컬 시크릿 키 파일을 사용합니다`));
           } else if (keyResult.status === "skipped_provider") {
-            p.log.message(pc.dim("Skipping local key file management for non-local provider"));
+            p.log.message(pc.dim("로컬이 아닌 제공자를 사용하므로 로컬 키 파일 관리를 건너뜁니다"));
           } else {
-            p.log.message(pc.dim("Skipping local key file management because PAPERCLIP_SECRETS_MASTER_KEY is set"));
+            p.log.message(pc.dim("PAPERCLIP_SECRETS_MASTER_KEY가 설정되어 있으므로 로컬 키 파일 관리를 건너뜁니다"));
           }
         }
         break;
@@ -174,14 +174,14 @@ export async function configure(opts: {
     config.$meta.source = "configure";
 
     writeConfig(config, opts.config);
-    p.log.success(`${SECTION_LABELS[section]} configuration updated.`);
+    p.log.success(`${SECTION_LABELS[section]} 설정이 업데이트되었습니다.`);
 
     // If section was provided via CLI flag, don't loop
     if (opts.section) {
       continueLoop = false;
     } else {
       const another = await p.confirm({
-        message: "Configure another section?",
+        message: "다른 섹션도 설정하시겠습니까?",
         initialValue: false,
       });
 
@@ -193,5 +193,5 @@ export async function configure(opts: {
     }
   }
 
-  p.outro("Configuration saved.");
+  p.outro("설정이 저장되었습니다.");
 }

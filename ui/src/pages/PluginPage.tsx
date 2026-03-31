@@ -104,13 +104,13 @@ export function PluginPage() {
     }
     return (
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">Select a company to view this page.</p>
+        <p className="text-sm text-muted-foreground">이 페이지를 보려면 회사를 선택하세요.</p>
       </div>
     );
   }
 
   if (!contributions) {
-    return <div className="text-sm text-muted-foreground">Loading…</div>;
+    return <div className="text-sm text-muted-foreground">불러오는 중…</div>;
   }
 
   if (!pluginId && pluginRoutePath) {
@@ -120,7 +120,7 @@ export function PluginPage() {
     if (duplicateMatches.length > 1) {
       return (
         <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive">
-          Multiple plugins declare the route <code>{pluginRoutePath}</code>. Use the plugin-id route until the conflict is resolved.
+          여러 Plugin이 <code>{pluginRoutePath}</code> 경로를 선언합니다. 충돌이 해결될 때까지 Plugin ID 경로를 사용하세요.
         </div>
       );
     }
@@ -141,7 +141,7 @@ export function PluginPage() {
         <Button variant="ghost" size="sm" asChild>
           <Link to={companyPrefix ? `/${companyPrefix}/dashboard` : "/dashboard"}>
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
+            돌아가기
           </Link>
         </Button>
       </div>

@@ -4,17 +4,17 @@ import type { CheckResult } from "./index.js";
 export async function llmCheck(config: PaperclipConfig): Promise<CheckResult> {
   if (!config.llm) {
     return {
-      name: "LLM provider",
+      name: "LLM 제공자",
       status: "pass",
-      message: "No LLM provider configured (optional)",
+      message: "LLM 제공자가 설정되지 않았습니다 (선택 사항)",
     };
   }
 
   if (!config.llm.apiKey) {
     return {
-      name: "LLM provider",
+      name: "LLM 제공자",
       status: "pass",
-      message: `${config.llm.provider} configured but no API key set (optional)`,
+      message: `${config.llm.provider}가 설정되었지만 API 키가 없습니다 (선택 사항)`,
     };
   }
 
@@ -34,49 +34,49 @@ export async function llmCheck(config: PaperclipConfig): Promise<CheckResult> {
         }),
       });
       if (res.ok || res.status === 400) {
-        return { name: "LLM provider", status: "pass", message: "Claude API key is valid" };
+        return { name: "LLM 제공자", status: "pass", message: "Claude API 키가 유효합니다" };
       }
       if (res.status === 401) {
         return {
-          name: "LLM provider",
+          name: "LLM 제공자",
           status: "fail",
-          message: "Claude API key is invalid (401)",
+          message: "Claude API 키가 유효하지 않습니다 (401)",
           canRepair: false,
-          repairHint: "Run `paperclipai configure --section llm`",
+          repairHint: "`paperclipai configure --section llm`을 실행하세요",
         };
       }
       return {
-        name: "LLM provider",
+        name: "LLM 제공자",
         status: "warn",
-        message: `Claude API returned status ${res.status}`,
+        message: `Claude API가 상태 ${res.status}을 반환했습니다`,
       };
     } else {
       const res = await fetch("https://api.openai.com/v1/models", {
         headers: { Authorization: `Bearer ${config.llm.apiKey}` },
       });
       if (res.ok) {
-        return { name: "LLM provider", status: "pass", message: "OpenAI API key is valid" };
+        return { name: "LLM 제공자", status: "pass", message: "OpenAI API 키가 유효합니다" };
       }
       if (res.status === 401) {
         return {
-          name: "LLM provider",
+          name: "LLM 제공자",
           status: "fail",
-          message: "OpenAI API key is invalid (401)",
+          message: "OpenAI API 키가 유효하지 않습니다 (401)",
           canRepair: false,
-          repairHint: "Run `paperclipai configure --section llm`",
+          repairHint: "`paperclipai configure --section llm`을 실행하세요",
         };
       }
       return {
-        name: "LLM provider",
+        name: "LLM 제공자",
         status: "warn",
-        message: `OpenAI API returned status ${res.status}`,
+        message: `OpenAI API가 상태 ${res.status}을 반환했습니다`,
       };
     }
   } catch {
     return {
-      name: "LLM provider",
+      name: "LLM 제공자",
       status: "warn",
-      message: "Could not reach API to validate key",
+      message: "API에 연결하여 키를 검증할 수 없습니다",
     };
   }
 }

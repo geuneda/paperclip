@@ -218,7 +218,7 @@ function quickstartDefaultsFromEnv(): {
   if (deploymentMode === "local_trusted" && process.env.PAPERCLIP_DEPLOYMENT_EXPOSURE !== undefined) {
     ignoredEnvKeys.push({
       key: "PAPERCLIP_DEPLOYMENT_EXPOSURE",
-      reason: "Ignored because deployment mode local_trusted always forces private exposure",
+      reason: "배포 모드 local_trusted는 항상 private 노출을 강제하므로 무시됨",
     });
   }
 
@@ -246,14 +246,14 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
 
   let existingConfig: PaperclipConfig | null = null;
   if (configExists(opts.config)) {
-    p.log.message(pc.dim(`${configPath} exists`));
+    p.log.message(pc.dim(`${configPath} 파일이 존재합니다`));
 
     try {
       existingConfig = readConfig(opts.config);
     } catch (err) {
       p.log.message(
         pc.yellow(
-          `Existing config appears invalid and will be updated.\n${err instanceof Error ? err.message : String(err)}`,
+          `기존 설정 파일이 유효하지 않아 업데이트됩니다.\n${err instanceof Error ? err.message : String(err)}`,
         ),
       );
     }
@@ -261,56 +261,56 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
 
   if (existingConfig) {
     p.log.message(
-      pc.dim("Existing Paperclip install detected; keeping the current configuration unchanged."),
+      pc.dim("기존 Paperclip 설치가 감지되었습니다. 현재 설정을 유지합니다."),
     );
-    p.log.message(pc.dim(`Use ${pc.cyan("paperclipai configure")} if you want to change settings.`));
+    p.log.message(pc.dim(`설정을 변경하려면 ${pc.cyan("paperclipai configure")}를 실행하세요.`));
 
     const jwtSecret = ensureAgentJwtSecret(configPath);
     const envFilePath = resolveAgentJwtEnvFile(configPath);
     if (jwtSecret.created) {
-      p.log.success(`Created ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")} in ${pc.dim(envFilePath)}`);
+      p.log.success(`${pc.dim(envFilePath)}에 ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")}을 생성했습니다`);
     } else if (process.env.PAPERCLIP_AGENT_JWT_SECRET?.trim()) {
-      p.log.info(`Using existing ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")} from environment`);
+      p.log.info(`환경 변수에서 기존 ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")}을 사용합니다`);
     } else {
-      p.log.info(`Using existing ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")} in ${pc.dim(envFilePath)}`);
+      p.log.info(`${pc.dim(envFilePath)}의 기존 ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")}을 사용합니다`);
     }
 
     const keyResult = ensureLocalSecretsKeyFile(existingConfig, configPath);
     if (keyResult.status === "created") {
-      p.log.success(`Created local secrets key file at ${pc.dim(keyResult.path)}`);
+      p.log.success(`${pc.dim(keyResult.path)}에 로컬 시크릿 키 파일을 생성했습니다`);
     } else if (keyResult.status === "existing") {
-      p.log.message(pc.dim(`Using existing local secrets key file at ${keyResult.path}`));
+      p.log.message(pc.dim(`${keyResult.path}의 기존 로컬 시크릿 키 파일을 사용합니다`));
     }
 
     p.note(
       [
-        "Existing config preserved",
+        "기존 설정 유지됨",
         `Database: ${existingConfig.database.mode}`,
-        existingConfig.llm ? `LLM: ${existingConfig.llm.provider}` : "LLM: not configured",
-        `Logging: ${existingConfig.logging.mode} -> ${existingConfig.logging.logDir}`,
-        `Server: ${existingConfig.server.deploymentMode}/${existingConfig.server.exposure} @ ${existingConfig.server.host}:${existingConfig.server.port}`,
-        `Allowed hosts: ${existingConfig.server.allowedHostnames.length > 0 ? existingConfig.server.allowedHostnames.join(", ") : "(loopback only)"}`,
-        `Auth URL mode: ${existingConfig.auth.baseUrlMode}${existingConfig.auth.publicBaseUrl ? ` (${existingConfig.auth.publicBaseUrl})` : ""}`,
+        existingConfig.llm ? `LLM: ${existingConfig.llm.provider}` : "LLM: 설정되지 않음",
+        `로깅: ${existingConfig.logging.mode} -> ${existingConfig.logging.logDir}`,
+        `서버: ${existingConfig.server.deploymentMode}/${existingConfig.server.exposure} @ ${existingConfig.server.host}:${existingConfig.server.port}`,
+        `허용된 호스트: ${existingConfig.server.allowedHostnames.length > 0 ? existingConfig.server.allowedHostnames.join(", ") : "(루프백만)"}`,
+        `인증 URL 모드: ${existingConfig.auth.baseUrlMode}${existingConfig.auth.publicBaseUrl ? ` (${existingConfig.auth.publicBaseUrl})` : ""}`,
         `Storage: ${existingConfig.storage.provider}`,
-        `Secrets: ${existingConfig.secrets.provider} (strict mode ${existingConfig.secrets.strictMode ? "on" : "off"})`,
-        "Agent auth: PAPERCLIP_AGENT_JWT_SECRET configured",
+        `Secrets: ${existingConfig.secrets.provider} (엄격 모드 ${existingConfig.secrets.strictMode ? "켜짐" : "꺼짐"})`,
+        "Agent 인증: PAPERCLIP_AGENT_JWT_SECRET 설정됨",
       ].join("\n"),
-      "Configuration ready",
+      "설정 준비 완료",
     );
 
     p.note(
       [
-        `Run: ${pc.cyan("paperclipai run")}`,
-        `Reconfigure later: ${pc.cyan("paperclipai configure")}`,
-        `Diagnose setup: ${pc.cyan("paperclipai doctor")}`,
+        `실행: ${pc.cyan("paperclipai run")}`,
+        `설정 변경: ${pc.cyan("paperclipai configure")}`,
+        `설정 진단: ${pc.cyan("paperclipai doctor")}`,
       ].join("\n"),
-      "Next commands",
+      "다음 명령어",
     );
 
     let shouldRunNow = opts.run === true || opts.yes === true;
     if (!shouldRunNow && !opts.invokedByRun && process.stdin.isTTY && process.stdout.isTTY) {
       const answer = await p.confirm({
-        message: "Start Paperclip now?",
+        message: "지금 Paperclip을 시작하시겠습니까?",
         initialValue: true,
       });
       if (!p.isCancel(answer)) {
@@ -325,32 +325,32 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
       return;
     }
 
-    p.outro("Existing Paperclip setup is ready.");
+    p.outro("기존 Paperclip 설정이 준비되었습니다.");
     return;
   }
 
   let setupMode: SetupMode = "quickstart";
   if (opts.yes) {
-    p.log.message(pc.dim("`--yes` enabled: using Quickstart defaults."));
+    p.log.message(pc.dim("`--yes` 활성화됨: Quickstart 기본값을 사용합니다."));
   } else {
     const setupModeChoice = await p.select({
-      message: "Choose setup path",
+      message: "설정 방식을 선택하세요",
       options: [
         {
           value: "quickstart" as const,
-          label: "Quickstart",
-          hint: "Recommended: local defaults + ready to run",
+          label: "빠른 시작",
+          hint: "권장: 로컬 기본값 + 바로 실행 가능",
         },
         {
           value: "advanced" as const,
-          label: "Advanced setup",
-          hint: "Customize database, server, storage, and more",
+          label: "고급 설정",
+          hint: "데이터베이스, 서버, 스토리지 등을 직접 설정",
         },
       ],
       initialValue: "quickstart",
     });
     if (p.isCancel(setupModeChoice)) {
-      p.cancel("Setup cancelled.");
+      p.cancel("설정이 취소되었습니다.");
       return;
     }
     setupMode = setupModeChoice as SetupMode;
@@ -368,28 +368,28 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
   } = derivedDefaults;
 
   if (setupMode === "advanced") {
-    p.log.step(pc.bold("Database"));
+    p.log.step(pc.bold("데이터베이스"));
     database = await promptDatabase(database);
 
     if (database.mode === "postgres" && database.connectionString) {
       const s = p.spinner();
-      s.start("Testing database connection...");
+      s.start("데이터베이스 연결 테스트 중...");
       try {
         const { createDb } = await import("@paperclipai/db");
         const db = createDb(database.connectionString);
         await db.execute("SELECT 1");
-        s.stop("Database connection successful");
+        s.stop("데이터베이스 연결 성공");
       } catch {
-        s.stop(pc.yellow("Could not connect to database — you can fix this later with `paperclipai doctor`"));
+        s.stop(pc.yellow("데이터베이스에 연결할 수 없습니다 -- 나중에 `paperclipai doctor`로 수정할 수 있습니다"));
       }
     }
 
-    p.log.step(pc.bold("LLM Provider"));
+    p.log.step(pc.bold("LLM 제공자"));
     llm = await promptLlm();
 
     if (llm?.apiKey) {
       const s = p.spinner();
-      s.start("Validating API key...");
+      s.start("API 키 검증 중...");
       try {
         if (llm.provider === "claude") {
           const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -406,36 +406,36 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
             }),
           });
           if (res.ok || res.status === 400) {
-            s.stop("API key is valid");
+            s.stop("API 키가 유효합니다");
           } else if (res.status === 401) {
-            s.stop(pc.yellow("API key appears invalid — you can update it later"));
+            s.stop(pc.yellow("API 키가 유효하지 않은 것 같습니다 -- 나중에 업데이트할 수 있습니다"));
           } else {
-            s.stop(pc.yellow("Could not validate API key — continuing anyway"));
+            s.stop(pc.yellow("API 키를 검증할 수 없습니다 -- 계속 진행합니다"));
           }
         } else {
           const res = await fetch("https://api.openai.com/v1/models", {
             headers: { Authorization: `Bearer ${llm.apiKey}` },
           });
           if (res.ok) {
-            s.stop("API key is valid");
+            s.stop("API 키가 유효합니다");
           } else if (res.status === 401) {
-            s.stop(pc.yellow("API key appears invalid — you can update it later"));
+            s.stop(pc.yellow("API 키가 유효하지 않은 것 같습니다 -- 나중에 업데이트할 수 있습니다"));
           } else {
-            s.stop(pc.yellow("Could not validate API key — continuing anyway"));
+            s.stop(pc.yellow("API 키를 검증할 수 없습니다 -- 계속 진행합니다"));
           }
         }
       } catch {
-        s.stop(pc.yellow("Could not reach API — continuing anyway"));
+        s.stop(pc.yellow("API에 연결할 수 없습니다 -- 계속 진행합니다"));
       }
     }
 
-    p.log.step(pc.bold("Logging"));
+    p.log.step(pc.bold("로깅"));
     logging = await promptLogging();
 
-    p.log.step(pc.bold("Server"));
+    p.log.step(pc.bold("서버"));
     ({ server, auth } = await promptServer({ currentServer: server, currentAuth: auth }));
 
-    p.log.step(pc.bold("Storage"));
+    p.log.step(pc.bold("스토리지"));
     storage = await promptStorage(storage);
 
     p.log.step(pc.bold("Secrets"));
@@ -449,32 +449,32 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
     };
     p.log.message(
       pc.dim(
-        `Using defaults: provider=${secrets.provider}, strictMode=${secrets.strictMode}, keyFile=${secrets.localEncrypted.keyFilePath}`,
+        `기본값 사용: provider=${secrets.provider}, strictMode=${secrets.strictMode}, keyFile=${secrets.localEncrypted.keyFilePath}`,
       ),
     );
   } else {
-    p.log.step(pc.bold("Quickstart"));
-    p.log.message(pc.dim("Using quickstart defaults."));
+    p.log.step(pc.bold("빠른 시작"));
+    p.log.message(pc.dim("빠른 시작 기본값을 사용합니다."));
     if (usedEnvKeys.length > 0) {
-      p.log.message(pc.dim(`Environment-aware defaults active (${usedEnvKeys.length} env var(s) detected).`));
+      p.log.message(pc.dim(`환경 변수 인식 기본값 활성화됨 (${usedEnvKeys.length}개 환경 변수 감지).`));
     } else {
       p.log.message(
-        pc.dim("No environment overrides detected: embedded database, file storage, local encrypted secrets."),
+        pc.dim("환경 변수 오버라이드 없음: 내장 데이터베이스, 파일 스토리지, 로컬 암호화 Secrets 사용."),
       );
     }
     for (const ignored of ignoredEnvKeys) {
-      p.log.message(pc.dim(`Ignored ${ignored.key}: ${ignored.reason}`));
+      p.log.message(pc.dim(`무시됨 ${ignored.key}: ${ignored.reason}`));
     }
   }
 
   const jwtSecret = ensureAgentJwtSecret(configPath);
   const envFilePath = resolveAgentJwtEnvFile(configPath);
   if (jwtSecret.created) {
-    p.log.success(`Created ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")} in ${pc.dim(envFilePath)}`);
+    p.log.success(`${pc.dim(envFilePath)}에 ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")}을 생성했습니다`);
   } else if (process.env.PAPERCLIP_AGENT_JWT_SECRET?.trim()) {
-    p.log.info(`Using existing ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")} from environment`);
+    p.log.info(`환경 변수에서 기존 ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")}을 사용합니다`);
   } else {
-    p.log.info(`Using existing ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")} in ${pc.dim(envFilePath)}`);
+    p.log.info(`${pc.dim(envFilePath)}의 기존 ${pc.cyan("PAPERCLIP_AGENT_JWT_SECRET")}을 사용합니다`);
   }
 
   const config: PaperclipConfig = {
@@ -494,9 +494,9 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
 
   const keyResult = ensureLocalSecretsKeyFile(config, configPath);
   if (keyResult.status === "created") {
-    p.log.success(`Created local secrets key file at ${pc.dim(keyResult.path)}`);
+    p.log.success(`${pc.dim(keyResult.path)}에 로컬 시크릿 키 파일을 생성했습니다`);
   } else if (keyResult.status === "existing") {
-    p.log.message(pc.dim(`Using existing local secrets key file at ${keyResult.path}`));
+    p.log.message(pc.dim(`${keyResult.path}의 기존 로컬 시크릿 키 파일을 사용합니다`));
   }
 
   writeConfig(config, opts.config);
@@ -504,36 +504,36 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
   p.note(
     [
       `Database: ${database.mode}`,
-      llm ? `LLM: ${llm.provider}` : "LLM: not configured",
-      `Logging: ${logging.mode} -> ${logging.logDir}`,
-      `Server: ${server.deploymentMode}/${server.exposure} @ ${server.host}:${server.port}`,
-      `Allowed hosts: ${server.allowedHostnames.length > 0 ? server.allowedHostnames.join(", ") : "(loopback only)"}`,
-      `Auth URL mode: ${auth.baseUrlMode}${auth.publicBaseUrl ? ` (${auth.publicBaseUrl})` : ""}`,
+      llm ? `LLM: ${llm.provider}` : "LLM: 설정되지 않음",
+      `로깅: ${logging.mode} -> ${logging.logDir}`,
+      `서버: ${server.deploymentMode}/${server.exposure} @ ${server.host}:${server.port}`,
+      `허용된 호스트: ${server.allowedHostnames.length > 0 ? server.allowedHostnames.join(", ") : "(루프백만)"}`,
+      `인증 URL 모드: ${auth.baseUrlMode}${auth.publicBaseUrl ? ` (${auth.publicBaseUrl})` : ""}`,
       `Storage: ${storage.provider}`,
-      `Secrets: ${secrets.provider} (strict mode ${secrets.strictMode ? "on" : "off"})`,
-      "Agent auth: PAPERCLIP_AGENT_JWT_SECRET configured",
+      `Secrets: ${secrets.provider} (엄격 모드 ${secrets.strictMode ? "켜짐" : "꺼짐"})`,
+      "Agent 인증: PAPERCLIP_AGENT_JWT_SECRET 설정됨",
     ].join("\n"),
-    "Configuration saved",
+    "설정 저장 완료",
   );
 
   p.note(
     [
-      `Run: ${pc.cyan("paperclipai run")}`,
-      `Reconfigure later: ${pc.cyan("paperclipai configure")}`,
-      `Diagnose setup: ${pc.cyan("paperclipai doctor")}`,
+      `실행: ${pc.cyan("paperclipai run")}`,
+      `설정 변경: ${pc.cyan("paperclipai configure")}`,
+      `설정 진단: ${pc.cyan("paperclipai doctor")}`,
     ].join("\n"),
-    "Next commands",
+    "다음 명령어",
   );
 
   if (canCreateBootstrapInviteImmediately({ database, server })) {
-    p.log.step("Generating bootstrap CEO invite");
+    p.log.step("부트스트랩 CEO 초대 생성 중");
     await bootstrapCeoInvite({ config: configPath });
   }
 
   let shouldRunNow = opts.run === true || opts.yes === true;
   if (!shouldRunNow && !opts.invokedByRun && process.stdin.isTTY && process.stdout.isTTY) {
     const answer = await p.confirm({
-      message: "Start Paperclip now?",
+      message: "지금 Paperclip을 시작하시겠습니까?",
       initialValue: true,
     });
     if (!p.isCancel(answer)) {
@@ -551,12 +551,12 @@ export async function onboard(opts: OnboardOptions): Promise<void> {
   if (server.deploymentMode === "authenticated" && database.mode === "embedded-postgres") {
     p.log.info(
       [
-        "Bootstrap CEO invite will be created after the server starts.",
-        `Next: ${pc.cyan("paperclipai run")}`,
-        `Then: ${pc.cyan("paperclipai auth bootstrap-ceo")}`,
+        "부트스트랩 CEO 초대는 서버 시작 후 생성됩니다.",
+        `다음: ${pc.cyan("paperclipai run")}`,
+        `이후: ${pc.cyan("paperclipai auth bootstrap-ceo")}`,
       ].join("\n"),
     );
   }
 
-  p.outro("You're all set!");
+  p.outro("모든 설정이 완료되었습니다!");
 }

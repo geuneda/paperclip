@@ -32,8 +32,18 @@ const boardStatuses = [
   "cancelled",
 ];
 
+const KANBAN_STATUS_LABELS: Record<string, string> = {
+  backlog: "백로그",
+  todo: "할 일",
+  in_progress: "진행 중",
+  in_review: "검토 중",
+  done: "완료",
+  cancelled: "취소됨",
+  blocked: "차단됨",
+};
+
 function statusLabel(status: string): string {
-  return status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return KANBAN_STATUS_LABELS[status] ?? status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 interface Agent {

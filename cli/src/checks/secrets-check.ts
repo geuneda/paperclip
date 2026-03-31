@@ -38,10 +38,10 @@ function withStrictModeNote(
   return {
     ...base,
     status: "warn",
-    message: `${base.message}; strict secret mode is disabled for postgres deployment`,
+    message: `${base.message}; PostgreSQL 배포에서 엄격 시크릿 모드가 비활성화되어 있습니다`,
     repairHint: base.repairHint
-      ? `${base.repairHint}. Consider enabling secrets.strictMode`
-      : "Consider enabling secrets.strictMode",
+      ? `${base.repairHint}. secrets.strictMode 활성화를 고려하세요`
+      : "secrets.strictMode 활성화를 고려하세요",
   };
 }
 
@@ -49,11 +49,11 @@ export function secretsCheck(config: PaperclipConfig, configPath?: string): Chec
   const provider = config.secrets.provider;
   if (provider !== "local_encrypted") {
     return {
-      name: "Secrets adapter",
+      name: "Secrets Adapter",
       status: "fail",
-      message: `${provider} is configured, but this build only supports local_encrypted`,
+      message: `${provider}가 설정되었지만 이 빌드는 local_encrypted만 지원합니다`,
       canRepair: false,
-      repairHint: "Run `paperclipai configure --section secrets` and set provider to local_encrypted",
+      repairHint: "`paperclipai configure --section secrets`를 실행하고 제공자를 local_encrypted로 설정하세요",
     };
   }
 
@@ -61,20 +61,20 @@ export function secretsCheck(config: PaperclipConfig, configPath?: string): Chec
   if (envMasterKey && envMasterKey.trim().length > 0) {
     if (!decodeMasterKey(envMasterKey)) {
       return {
-        name: "Secrets adapter",
+        name: "Secrets Adapter",
         status: "fail",
         message:
-          "PAPERCLIP_SECRETS_MASTER_KEY is invalid (expected 32-byte base64, 64-char hex, or raw 32-char string)",
+          "PAPERCLIP_SECRETS_MASTER_KEY가 유효하지 않습니다 (32바이트 base64, 64자 hex, 또는 32자 원시 문자열 필요)",
         canRepair: false,
-        repairHint: "Set PAPERCLIP_SECRETS_MASTER_KEY to a valid key or unset it to use a key file",
+        repairHint: "PAPERCLIP_SECRETS_MASTER_KEY를 유효한 키로 설정하거나 키 파일을 사용하려면 해제하세요",
       };
     }
 
     return withStrictModeNote(
       {
-        name: "Secrets adapter",
+        name: "Secrets Adapter",
         status: "pass",
-        message: "Local encrypted provider configured via PAPERCLIP_SECRETS_MASTER_KEY",
+        message: "PAPERCLIP_SECRETS_MASTER_KEY를 통해 로컬 암호화 제공자가 설정되었습니다",
       },
       config,
     );
@@ -90,9 +90,9 @@ export function secretsCheck(config: PaperclipConfig, configPath?: string): Chec
   if (!fs.existsSync(keyFilePath)) {
     return withStrictModeNote(
       {
-        name: "Secrets adapter",
+        name: "Secrets Adapter",
         status: "warn",
-        message: `Secrets key file does not exist yet: ${keyFilePath}`,
+        message: `시크릿 키 파일이 아직 존재하지 않습니다: ${keyFilePath}`,
         canRepair: true,
         repair: () => {
           fs.mkdirSync(path.dirname(keyFilePath), { recursive: true });
@@ -106,7 +106,7 @@ export function secretsCheck(config: PaperclipConfig, configPath?: string): Chec
             // best effort
           }
         },
-        repairHint: "Run with --repair to create a local encrypted secrets key file",
+        repairHint: "--repair로 실행하여 로컬 암호화 시크릿 키 파일을 생성하세요",
       },
       config,
     );
@@ -117,29 +117,29 @@ export function secretsCheck(config: PaperclipConfig, configPath?: string): Chec
     raw = fs.readFileSync(keyFilePath, "utf8");
   } catch (err) {
     return {
-      name: "Secrets adapter",
+      name: "Secrets Adapter",
       status: "fail",
-      message: `Could not read secrets key file: ${err instanceof Error ? err.message : String(err)}`,
+      message: `시크릿 키 파일을 읽을 수 없습니다: ${err instanceof Error ? err.message : String(err)}`,
       canRepair: false,
-      repairHint: "Check file permissions or set PAPERCLIP_SECRETS_MASTER_KEY",
+      repairHint: "파일 권한을 확인하거나 PAPERCLIP_SECRETS_MASTER_KEY를 설정하세요",
     };
   }
 
   if (!decodeMasterKey(raw)) {
     return {
-      name: "Secrets adapter",
+      name: "Secrets Adapter",
       status: "fail",
-      message: `Invalid key material in ${keyFilePath}`,
+      message: `${keyFilePath}에 유효하지 않은 키 자료가 있습니다`,
       canRepair: false,
-      repairHint: "Replace with valid key material or delete it and run doctor --repair",
+      repairHint: "유효한 키 자료로 교체하거나 삭제 후 doctor --repair를 실행하세요",
     };
   }
 
   return withStrictModeNote(
     {
-      name: "Secrets adapter",
+      name: "Secrets Adapter",
       status: "pass",
-      message: `Local encrypted provider configured with key file ${keyFilePath}`,
+      message: `키 파일 ${keyFilePath}로 로컬 암호화 제공자가 설정되었습니다`,
     },
     config,
   );

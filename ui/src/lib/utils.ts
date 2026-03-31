@@ -12,18 +12,18 @@ export function formatCents(cents: number): string {
 }
 
 export function formatDate(date: Date | string): string {
-  return new Date(date).toLocaleDateString("en-US", {
+  return new Date(date).toLocaleDateString("ko-KR", {
+    year: "numeric",
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
 }
 
 export function formatDateTime(date: Date | string): string {
-  return new Date(date).toLocaleString("en-US", {
+  return new Date(date).toLocaleString("ko-KR", {
+    year: "numeric",
     month: "short",
     day: "numeric",
-    year: "numeric",
     hour: "numeric",
     minute: "2-digit",
   });
@@ -33,13 +33,13 @@ export function relativeTime(date: Date | string): string {
   const now = Date.now();
   const then = new Date(date).getTime();
   const diffSec = Math.round((now - then) / 1000);
-  if (diffSec < 60) return "just now";
+  if (diffSec < 60) return "방금 전";
   const diffMin = Math.round(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return `${diffMin}분 전`;
   const diffHr = Math.round(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffHr < 24) return `${diffHr}시간 전`;
   const diffDay = Math.round(diffHr / 24);
-  if (diffDay < 30) return `${diffDay}d ago`;
+  if (diffDay < 30) return `${diffDay}일 전`;
   return formatDate(date);
 }
 
@@ -65,12 +65,12 @@ export function providerDisplayName(provider: string): string {
 
 export function billingTypeDisplayName(billingType: BillingType): string {
   const map: Record<BillingType, string> = {
-    metered_api: "Metered API",
-    subscription_included: "Subscription",
-    subscription_overage: "Subscription overage",
-    credits: "Credits",
-    fixed: "Fixed",
-    unknown: "Unknown",
+    metered_api: "종량제 API",
+    subscription_included: "구독",
+    subscription_overage: "구독 초과분",
+    credits: "크레딧",
+    fixed: "고정",
+    unknown: "알 수 없음",
   };
   return map[billingType];
 }
@@ -119,26 +119,26 @@ export function visibleRunCostUsd(
 
 export function financeEventKindDisplayName(eventKind: FinanceEventKind): string {
   const map: Record<FinanceEventKind, string> = {
-    inference_charge: "Inference charge",
-    platform_fee: "Platform fee",
-    credit_purchase: "Credit purchase",
-    credit_refund: "Credit refund",
-    credit_expiry: "Credit expiry",
-    byok_fee: "BYOK fee",
-    gateway_overhead: "Gateway overhead",
-    log_storage_charge: "Log storage",
-    logpush_charge: "Logpush",
-    provisioned_capacity_charge: "Provisioned capacity",
-    training_charge: "Training",
-    custom_model_import_charge: "Custom model import",
-    custom_model_storage_charge: "Custom model storage",
-    manual_adjustment: "Manual adjustment",
+    inference_charge: "추론 비용",
+    platform_fee: "플랫폼 수수료",
+    credit_purchase: "크레딧 구매",
+    credit_refund: "크레딧 환불",
+    credit_expiry: "크레딧 만료",
+    byok_fee: "BYOK 수수료",
+    gateway_overhead: "게이트웨이 오버헤드",
+    log_storage_charge: "로그 저장소",
+    logpush_charge: "로그 푸시",
+    provisioned_capacity_charge: "프로비저닝된 용량",
+    training_charge: "학습",
+    custom_model_import_charge: "커스텀 모델 가져오기",
+    custom_model_storage_charge: "커스텀 모델 저장소",
+    manual_adjustment: "수동 조정",
   };
   return map[eventKind];
 }
 
 export function financeDirectionDisplayName(direction: FinanceDirection): string {
-  return direction === "credit" ? "Credit" : "Debit";
+  return direction === "credit" ? "크레딧" : "차변";
 }
 
 /** Build an issue URL using the human-readable identifier when available. */

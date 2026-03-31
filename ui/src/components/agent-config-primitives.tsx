@@ -19,42 +19,42 @@ import { AGENT_ROLE_LABELS } from "@paperclipai/shared";
 
 /* ---- Help text for (?) tooltips ---- */
 export const help: Record<string, string> = {
-  name: "Display name for this agent.",
-  title: "Job title shown in the org chart.",
-  role: "Organizational role. Determines position and capabilities.",
-  reportsTo: "The agent this one reports to in the org hierarchy.",
-  capabilities: "Describes what this agent can do. Shown in the org chart and used for task routing.",
-  adapterType: "How this agent runs: local CLI (Claude/Codex/OpenCode), OpenClaw Gateway, spawned process, or generic HTTP webhook.",
-  cwd: "Deprecated legacy working directory fallback for local adapters. Existing agents may still carry this value, but new configurations should use project workspaces instead.",
-  promptTemplate: "Sent on every heartbeat. Keep this small and dynamic. Use it for current-task framing, not large static instructions. Supports {{ agent.id }}, {{ agent.name }}, {{ agent.role }} and other template variables.",
-  model: "Override the default model used by the adapter.",
-  thinkingEffort: "Control model reasoning depth. Supported values vary by adapter/model.",
-  chrome: "Enable Claude's Chrome integration by passing --chrome.",
-  dangerouslySkipPermissions: "Run unattended by auto-approving adapter permission prompts when supported.",
-  dangerouslyBypassSandbox: "Run Codex without sandbox restrictions. Required for filesystem/network access.",
-  search: "Enable Codex web search capability during runs.",
-  workspaceStrategy: "How Paperclip should realize an execution workspace for this agent. Keep project_primary for normal cwd execution, or use git_worktree for issue-scoped isolated checkouts.",
-  workspaceBaseRef: "Base git ref used when creating a worktree branch. Leave blank to use the resolved workspace ref or HEAD.",
-  workspaceBranchTemplate: "Template for naming derived branches. Supports {{issue.identifier}}, {{issue.title}}, {{agent.name}}, {{project.id}}, {{workspace.repoRef}}, and {{slug}}.",
-  worktreeParentDir: "Directory where derived worktrees should be created. Absolute, ~-prefixed, and repo-relative paths are supported.",
-  runtimeServicesJson: "Optional workspace runtime service definitions. Use this for shared app servers, workers, or other long-lived companion processes attached to the workspace.",
-  maxTurnsPerRun: "Maximum number of agentic turns (tool calls) per heartbeat run.",
-  command: "The command to execute (e.g. node, python).",
-  localCommand: "Override the path to the CLI command you want the adapter to call (e.g. /usr/local/bin/claude, codex, opencode).",
-  args: "Command-line arguments, comma-separated.",
-  extraArgs: "Extra CLI arguments for local adapters, comma-separated.",
-  envVars: "Environment variables injected into the adapter process. Use plain values or secret references.",
-  bootstrapPrompt: "Only sent when Paperclip starts a fresh session. Use this for stable setup guidance that should not be repeated on every heartbeat.",
-  payloadTemplateJson: "Optional JSON merged into remote adapter request payloads before Paperclip adds its standard wake and workspace fields.",
-  webhookUrl: "The URL that receives POST requests when the agent is invoked.",
-  heartbeatInterval: "Run this agent automatically on a timer. Useful for periodic tasks like checking for new work.",
-  intervalSec: "Seconds between automatic heartbeat invocations.",
-  timeoutSec: "Maximum seconds a run can take before being terminated. 0 means no timeout.",
-  graceSec: "Seconds to wait after sending interrupt before force-killing the process.",
-  wakeOnDemand: "Allow this agent to be woken by assignments, API calls, UI actions, or automated systems.",
-  cooldownSec: "Minimum seconds between consecutive heartbeat runs.",
-  maxConcurrentRuns: "Maximum number of heartbeat runs that can execute simultaneously for this agent.",
-  budgetMonthlyCents: "Monthly spending limit in cents. 0 means no limit.",
+  name: "이 Agent의 표시 이름입니다.",
+  title: "조직도에 표시되는 직함입니다.",
+  role: "조직 내 역할입니다. 위치와 권한을 결정합니다.",
+  reportsTo: "조직 계층에서 이 Agent가 보고하는 상위 Agent입니다.",
+  capabilities: "이 Agent가 할 수 있는 작업을 설명합니다. 조직도에 표시되며 작업 라우팅에 사용됩니다.",
+  adapterType: "이 Agent의 실행 방식: 로컬 CLI (Claude/Codex/OpenCode), OpenClaw Gateway, 생성된 프로세스, 또는 일반 HTTP 웹훅.",
+  cwd: "로컬 Adapter용 사용 중단된 레거시 작업 디렉터리 대체값입니다. 기존 Agent는 이 값을 가질 수 있지만, 새 구성은 Project Workspace를 사용해야 합니다.",
+  promptTemplate: "매 Heartbeat마다 전송됩니다. 작고 동적으로 유지하세요. 대규모 정적 지시가 아닌 현재 작업 프레이밍에 사용합니다. {{ agent.id }}, {{ agent.name }}, {{ agent.role }} 등의 템플릿 변수를 지원합니다.",
+  model: "Adapter가 사용하는 기본 모델을 재정의합니다.",
+  thinkingEffort: "모델의 추론 깊이를 제어합니다. 지원되는 값은 Adapter/모델에 따라 다릅니다.",
+  chrome: "--chrome 플래그를 전달하여 Claude의 Chrome 통합을 활성화합니다.",
+  dangerouslySkipPermissions: "지원되는 경우 Adapter 권한 프롬프트를 자동 승인하여 무인 실행합니다.",
+  dangerouslyBypassSandbox: "샌드박스 제한 없이 Codex를 실행합니다. 파일시스템/네트워크 접근에 필요합니다.",
+  search: "실행 중 Codex 웹 검색 기능을 활성화합니다.",
+  workspaceStrategy: "이 Agent의 실행 Workspace를 Paperclip이 구현하는 방식입니다. 일반 cwd 실행에는 project_primary를, Issue 범위 격리 체크아웃에는 git_worktree를 사용합니다.",
+  workspaceBaseRef: "Worktree 브랜치 생성 시 사용하는 기본 Git ref입니다. 비워두면 해석된 Workspace ref 또는 HEAD를 사용합니다.",
+  workspaceBranchTemplate: "파생 브랜치 이름 지정 템플릿입니다. {{issue.identifier}}, {{issue.title}}, {{agent.name}}, {{project.id}}, {{workspace.repoRef}}, {{slug}}를 지원합니다.",
+  worktreeParentDir: "파생 Worktree가 생성될 디렉터리입니다. 절대 경로, ~접두사 경로, 저장소 상대 경로를 지원합니다.",
+  runtimeServicesJson: "선택적 Workspace 런타임 서비스 정의입니다. 공유 앱 서버, 워커 또는 Workspace에 연결된 장기 실행 컴패니언 프로세스에 사용합니다.",
+  maxTurnsPerRun: "Heartbeat 실행당 최대 에이전트 턴(도구 호출) 수입니다.",
+  command: "실행할 명령어입니다 (예: node, python).",
+  localCommand: "Adapter가 호출할 CLI 명령어의 경로를 재정의합니다 (예: /usr/local/bin/claude, codex, opencode).",
+  args: "명령줄 인수이며, 쉼표로 구분합니다.",
+  extraArgs: "로컬 Adapter용 추가 CLI 인수이며, 쉼표로 구분합니다.",
+  envVars: "Adapter 프로세스에 주입되는 환경 변수입니다. 일반 값 또는 시크릿 참조를 사용합니다.",
+  bootstrapPrompt: "Paperclip이 새 세션을 시작할 때만 전송됩니다. 매 Heartbeat마다 반복되지 않아야 하는 안정적인 설정 지침에 사용합니다.",
+  payloadTemplateJson: "Paperclip이 표준 wake 및 Workspace 필드를 추가하기 전에 원격 Adapter 요청 페이로드에 병합되는 선택적 JSON입니다.",
+  webhookUrl: "Agent가 호출될 때 POST 요청을 수신하는 URL입니다.",
+  heartbeatInterval: "타이머로 이 Agent를 자동 실행합니다. 새 작업 확인과 같은 주기적 작업에 유용합니다.",
+  intervalSec: "자동 Heartbeat 호출 간 초 단위 간격입니다.",
+  timeoutSec: "실행이 종료되기 전 최대 초 수입니다. 0은 타임아웃 없음을 의미합니다.",
+  graceSec: "인터럽트 전송 후 프로세스를 강제 종료하기 전 대기하는 초 수입니다.",
+  wakeOnDemand: "배정, API 호출, UI 작업 또는 자동화 시스템에 의해 이 Agent를 깨울 수 있도록 합니다.",
+  cooldownSec: "연속 Heartbeat 실행 간 최소 초 수입니다.",
+  maxConcurrentRuns: "이 Agent에 대해 동시에 실행할 수 있는 최대 Heartbeat 실행 수입니다.",
+  budgetMonthlyCents: "월별 지출 한도(센트 단위)입니다. 0은 제한 없음을 의미합니다.",
 };
 
 export const adapterLabels: Record<string, string> = {
@@ -408,48 +408,48 @@ export function ChoosePathButton() {
         className="inline-flex items-center rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent/50 transition-colors shrink-0"
         onClick={() => setOpen(true)}
       >
-        Choose
+        선택
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Specify path manually</DialogTitle>
+            <DialogTitle>경로를 수동으로 지정</DialogTitle>
             <DialogDescription>
-              Browser security blocks apps from reading full local paths via a file picker.
-              Copy the absolute path and paste it into the input.
+              브라우저 보안으로 인해 파일 선택기를 통한 전체 로컬 경로 읽기가 차단됩니다.
+              절대 경로를 복사하여 입력란에 붙여넣으세요.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 text-sm">
             <section className="space-y-1.5">
               <p className="font-medium">macOS (Finder)</p>
               <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-                <li>Find the folder in Finder.</li>
-                <li>Hold <kbd>Option</kbd> and right-click the folder.</li>
-                <li>Click "Copy &lt;folder name&gt; as Pathname".</li>
-                <li>Paste the result into the path input.</li>
+                <li>Finder에서 폴더를 찾습니다.</li>
+                <li><kbd>Option</kbd>을 누른 채 폴더를 우클릭합니다.</li>
+                <li>"&lt;폴더 이름&gt;의 경로명 복사"를 클릭합니다.</li>
+                <li>결과를 경로 입력란에 붙여넣습니다.</li>
               </ol>
               <p className="rounded-md bg-muted px-2 py-1 font-mono text-xs">
                 /Users/yourname/Documents/project
               </p>
             </section>
             <section className="space-y-1.5">
-              <p className="font-medium">Windows (File Explorer)</p>
+              <p className="font-medium">Windows (파일 탐색기)</p>
               <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-                <li>Find the folder in File Explorer.</li>
-                <li>Hold <kbd>Shift</kbd> and right-click the folder.</li>
-                <li>Click "Copy as path".</li>
-                <li>Paste the result into the path input.</li>
+                <li>파일 탐색기에서 폴더를 찾습니다.</li>
+                <li><kbd>Shift</kbd>를 누른 채 폴더를 우클릭합니다.</li>
+                <li>"경로로 복사"를 클릭합니다.</li>
+                <li>결과를 경로 입력란에 붙여넣습니다.</li>
               </ol>
               <p className="rounded-md bg-muted px-2 py-1 font-mono text-xs">
                 C:\Users\yourname\Documents\project
               </p>
             </section>
             <section className="space-y-1.5">
-              <p className="font-medium">Terminal fallback (macOS/Linux)</p>
+              <p className="font-medium">터미널 대안 (macOS/Linux)</p>
               <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-                <li>Run <code>cd /path/to/folder</code>.</li>
-                <li>Run <code>pwd</code>.</li>
-                <li>Copy the output and paste it into the path input.</li>
+                <li><code>cd /path/to/folder</code>를 실행합니다.</li>
+                <li><code>pwd</code>를 실행합니다.</li>
+                <li>출력을 복사하여 경로 입력란에 붙여넣습니다.</li>
               </ol>
             </section>
           </div>

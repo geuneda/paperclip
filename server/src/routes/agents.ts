@@ -187,18 +187,18 @@ export function agentRoutes(db: Db) {
       if (req.actor.source === "local_implicit" || req.actor.isInstanceAdmin) return null;
       const allowed = await access.canUser(companyId, req.actor.userId, "agents:create");
       if (!allowed) {
-        throw forbidden("Missing permission: agents:create");
+        throw forbidden("권한 부족: agents:create");
       }
       return null;
     }
-    if (!req.actor.agentId) throw forbidden("Agent authentication required");
+    if (!req.actor.agentId) throw forbidden("Agent 인증이 필요합니다");
     const actorAgent = await svc.getById(req.actor.agentId);
     if (!actorAgent || actorAgent.companyId !== companyId) {
-      throw forbidden("Agent key cannot access another company");
+      throw forbidden("Agent 키로 다른 회사에 접근할 수 없습니다");
     }
     const allowedByGrant = await access.hasPermission(companyId, "agent", actorAgent.id, "agents:create");
     if (!allowedByGrant && !canCreateAgents(actorAgent)) {
-      throw forbidden("Missing permission: can create agents");
+      throw forbidden("권한 부족: Agent 생성 권한이 없습니다");
     }
     return actorAgent;
   }
@@ -223,11 +223,11 @@ export function agentRoutes(db: Db) {
   async function assertCanUpdateAgent(req: Request, targetAgent: { id: string; companyId: string }) {
     assertCompanyAccess(req, targetAgent.companyId);
     if (req.actor.type === "board") return;
-    if (!req.actor.agentId) throw forbidden("Agent authentication required");
+    if (!req.actor.agentId) throw forbidden("Agent 인증이 필요합니다");
 
     const actorAgent = await svc.getById(req.actor.agentId);
     if (!actorAgent || actorAgent.companyId !== targetAgent.companyId) {
-      throw forbidden("Agent key cannot access another company");
+      throw forbidden("Agent 키로 다른 회사에 접근할 수 없습니다");
     }
 
     if (actorAgent.id === targetAgent.id) return;
@@ -239,17 +239,17 @@ export function agentRoutes(db: Db) {
       "agents:create",
     );
     if (allowedByGrant || canCreateAgents(actorAgent)) return;
-    throw forbidden("Only CEO or agent creators can modify other agents");
+    throw forbidden("CEO 또는 Agent 생성자만 다른 Agent를 수정할 수 있습니다");
   }
 
   async function assertCanReadAgent(req: Request, targetAgent: { companyId: string }) {
     assertCompanyAccess(req, targetAgent.companyId);
     if (req.actor.type === "board") return;
-    if (!req.actor.agentId) throw forbidden("Agent authentication required");
+    if (!req.actor.agentId) throw forbidden("Agent 인증이 필요합니다");
 
     const actorAgent = await svc.getById(req.actor.agentId);
     if (!actorAgent || actorAgent.companyId !== targetAgent.companyId) {
-      throw forbidden("Agent key cannot access another company");
+      throw forbidden("Agent 키로 다른 회사에 접근할 수 없습니다");
     }
   }
 
@@ -275,15 +275,15 @@ export function agentRoutes(db: Db) {
 
     const companyId = await resolveCompanyIdForAgentReference(req);
     if (!companyId) {
-      throw unprocessable("Agent shortname lookup requires companyId query parameter");
+      throw unprocessable("Agent 약칭 조회에는 companyId 쿼리 파라미터가 필요합니다");
     }
 
     const resolved = await svc.resolveByReference(companyId, raw);
     if (resolved.ambiguous) {
-      throw conflict("Agent shortname is ambiguous in this company. Use the agent ID.");
+      throw conflict("이 회사에서 Agent 약칭이 중복됩니다. Agent ID를 사용하세요.");
     }
     if (!resolved.agent) {
-      throw notFound("Agent not found");
+      throw notFound("Agent를 찾을 수 없습니다");
     }
     return resolved.agent.id;
   }
@@ -423,7 +423,7 @@ export function agentRoutes(db: Db) {
       });
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
-      throw unprocessable(`Invalid opencode_local adapterConfig: ${reason}`);
+      throw unprocessable(`잘못된 opencode_local adapterConfig: ${reason}`);
     }
   }
 
@@ -434,11 +434,11 @@ export function agentRoutes(db: Db) {
     const cwd = asNonEmptyString(adapterConfig.cwd);
     if (!cwd) {
       throw unprocessable(
-        "Relative instructions path requires adapterConfig.cwd to be set to an absolute path",
+        "상대 지침 경로를 사용하려면 adapterConfig.cwd가 절대 경로로 설정되어야 합니다",
       );
     }
     if (!path.isAbsolute(cwd)) {
-      throw unprocessable("adapterConfig.cwd must be an absolute path to resolve relative instructions path");
+      throw unprocessable("상대 지침 경로를 해석하려면 adapterConfig.cwd가 절대 경로여야 합니다");
     }
     return path.resolve(cwd, trimmed);
   }
@@ -487,18 +487,18 @@ export function agentRoutes(db: Db) {
   async function assertCanManageInstructionsPath(req: Request, targetAgent: { id: string; companyId: string }) {
     assertCompanyAccess(req, targetAgent.companyId);
     if (req.actor.type === "board") return;
-    if (!req.actor.agentId) throw forbidden("Agent authentication required");
+    if (!req.actor.agentId) throw forbidden("Agent 인증이 필요합니다");
 
     const actorAgent = await svc.getById(req.actor.agentId);
     if (!actorAgent || actorAgent.companyId !== targetAgent.companyId) {
-      throw forbidden("Agent key cannot access another company");
+      throw forbidden("Agent 키로 다른 회사에 접근할 수 없습니다");
     }
     if (actorAgent.id === targetAgent.id) return;
 
     const chainOfCommand = await svc.getChainOfCommand(targetAgent.id);
     if (chainOfCommand.some((manager) => manager.id === actorAgent.id)) return;
 
-    throw forbidden("Only the target agent or an ancestor manager can update instructions path");
+    throw forbidden("대상 Agent 또는 상위 관리자만 지침 경로를 수정할 수 있습니다");
   }
 
   function summarizeAgentUpdateDetails(patch: Record<string, unknown>) {
@@ -691,7 +691,7 @@ export function agentRoutes(db: Db) {
 
       const adapter = findServerAdapter(type);
       if (!adapter) {
-        res.status(404).json({ error: `Unknown adapter type: ${type}` });
+        res.status(404).json({ error: `알 수 없는 Adapter 유형입니다: ${type}` });
         return;
       }
 
@@ -721,7 +721,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanReadConfigurations(req, agent.companyId);
@@ -764,7 +764,7 @@ export function agentRoutes(db: Db) {
       const id = req.params.id as string;
       const agent = await svc.getById(id);
       if (!agent) {
-        res.status(404).json({ error: "Agent not found" });
+        res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
         return;
       }
       await assertCanUpdateAgent(req, agent);
@@ -787,7 +787,7 @@ export function agentRoutes(db: Db) {
         requestedSkills,
       );
       if (!desiredSkills || !runtimeSkillEntries) {
-        throw unprocessable("Skill sync requires desiredSkills.");
+        throw unprocessable("스킬 동기화에는 desiredSkills가 필요합니다.");
       }
       const actor = getActorInfo(req);
       const updated = await svc.update(agent.id, {
@@ -800,7 +800,7 @@ export function agentRoutes(db: Db) {
         },
       });
       if (!updated) {
-        res.status(404).json({ error: "Agent not found" });
+        res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
         return;
       }
 
@@ -968,12 +968,12 @@ export function agentRoutes(db: Db) {
 
   router.get("/agents/me", async (req, res) => {
     if (req.actor.type !== "agent" || !req.actor.agentId) {
-      res.status(401).json({ error: "Agent authentication required" });
+      res.status(401).json({ error: "Agent 인증이 필요합니다" });
       return;
     }
     const agent = await svc.getById(req.actor.agentId);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     res.json(await buildAgentDetail(agent));
@@ -981,7 +981,7 @@ export function agentRoutes(db: Db) {
 
   router.get("/agents/me/inbox-lite", async (req, res) => {
     if (req.actor.type !== "agent" || !req.actor.agentId || !req.actor.companyId) {
-      res.status(401).json({ error: "Agent authentication required" });
+      res.status(401).json({ error: "Agent 인증이 필요합니다" });
       return;
     }
 
@@ -1009,7 +1009,7 @@ export function agentRoutes(db: Db) {
 
   router.get("/agents/me/inbox/mine", async (req, res) => {
     if (req.actor.type !== "agent" || !req.actor.agentId || !req.actor.companyId) {
-      res.status(401).json({ error: "Agent authentication required" });
+      res.status(401).json({ error: "Agent 인증이 필요합니다" });
       return;
     }
 
@@ -1028,7 +1028,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, agent.companyId);
@@ -1046,7 +1046,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanReadConfigurations(req, agent.companyId);
@@ -1057,7 +1057,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanReadConfigurations(req, agent.companyId);
@@ -1070,13 +1070,13 @@ export function agentRoutes(db: Db) {
     const revisionId = req.params.revisionId as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanReadConfigurations(req, agent.companyId);
     const revision = await svc.getConfigRevision(id, revisionId);
     if (!revision) {
-      res.status(404).json({ error: "Revision not found" });
+      res.status(404).json({ error: "리비전을 찾을 수 없습니다" });
       return;
     }
     res.json(redactConfigRevision(revision));
@@ -1087,7 +1087,7 @@ export function agentRoutes(db: Db) {
     const revisionId = req.params.revisionId as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanUpdateAgent(req, existing);
@@ -1098,7 +1098,7 @@ export function agentRoutes(db: Db) {
       userId: actor.actorType === "user" ? actor.actorId : null,
     });
     if (!updated) {
-      res.status(404).json({ error: "Revision not found" });
+      res.status(404).json({ error: "리비전을 찾을 수 없습니다" });
       return;
     }
 
@@ -1122,7 +1122,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, agent.companyId);
@@ -1136,7 +1136,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, agent.companyId);
@@ -1155,7 +1155,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, agent.companyId);
@@ -1220,7 +1220,7 @@ export function agentRoutes(db: Db) {
       .where(eq(companies.id, companyId))
       .then((rows) => rows[0] ?? null);
     if (!company) {
-      res.status(404).json({ error: "Company not found" });
+      res.status(404).json({ error: "회사를 찾을 수 없습니다" });
       return;
     }
 
@@ -1422,7 +1422,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, existing.companyId);
@@ -1430,18 +1430,18 @@ export function agentRoutes(db: Db) {
     if (req.actor.type === "agent") {
       const actorAgent = req.actor.agentId ? await svc.getById(req.actor.agentId) : null;
       if (!actorAgent || actorAgent.companyId !== existing.companyId) {
-        res.status(403).json({ error: "Forbidden" });
+        res.status(403).json({ error: "접근이 거부되었습니다" });
         return;
       }
       if (actorAgent.role !== "ceo") {
-        res.status(403).json({ error: "Only CEO can manage permissions" });
+        res.status(403).json({ error: "CEO만 권한을 관리할 수 있습니다" });
         return;
       }
     }
 
     const agent = await svc.updatePermissions(id, req.body);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1480,7 +1480,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1492,7 +1492,7 @@ export function agentRoutes(db: Db) {
     const adapterConfigKey = explicitKey ?? defaultKey;
     if (!adapterConfigKey) {
       res.status(422).json({
-        error: `No default instructions path key for adapter type '${existing.adapterType}'. Provide adapterConfigKey.`,
+        error: `Adapter 유형 '${existing.adapterType}'에 대한 기본 지침 경로 키가 없습니다. adapterConfigKey를 제공하세요.`,
       });
       return;
     }
@@ -1523,7 +1523,7 @@ export function agentRoutes(db: Db) {
       },
     );
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1558,7 +1558,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanReadAgent(req, existing);
@@ -1569,7 +1569,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanManageInstructionsPath(req, existing);
@@ -1617,14 +1617,14 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanReadAgent(req, existing);
 
     const relativePath = typeof req.query.path === "string" ? req.query.path : "";
     if (!relativePath.trim()) {
-      res.status(422).json({ error: "Query parameter 'path' is required" });
+      res.status(422).json({ error: "쿼리 파라미터 'path'가 필요합니다" });
       return;
     }
 
@@ -1635,7 +1635,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanManageInstructionsPath(req, existing);
@@ -1684,14 +1684,14 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanManageInstructionsPath(req, existing);
 
     const relativePath = typeof req.query.path === "string" ? req.query.path : "";
     if (!relativePath.trim()) {
-      res.status(422).json({ error: "Query parameter 'path' is required" });
+      res.status(422).json({ error: "쿼리 파라미터 'path'가 필요합니다" });
       return;
     }
 
@@ -1718,13 +1718,13 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const existing = await svc.getById(id);
     if (!existing) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     await assertCanUpdateAgent(req, existing);
 
     if (Object.prototype.hasOwnProperty.call(req.body, "permissions")) {
-      res.status(422).json({ error: "Use /api/agents/:id/permissions for permission changes" });
+      res.status(422).json({ error: "권한 변경은 /api/agents/:id/permissions를 사용하세요" });
       return;
     }
 
@@ -1734,7 +1734,7 @@ export function agentRoutes(db: Db) {
     if (Object.prototype.hasOwnProperty.call(patchData, "adapterConfig")) {
       const adapterConfig = asRecord(patchData.adapterConfig);
       if (!adapterConfig) {
-        res.status(422).json({ error: "adapterConfig must be an object" });
+        res.status(422).json({ error: "adapterConfig는 객체여야 합니다" });
         return;
       }
       const changingInstructionsPath = Object.keys(adapterConfig).some((key) =>
@@ -1806,7 +1806,7 @@ export function agentRoutes(db: Db) {
       },
     });
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1830,7 +1830,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.pause(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1853,7 +1853,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.resume(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1874,7 +1874,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.terminate(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1897,7 +1897,7 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.remove(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
 
@@ -1946,7 +1946,7 @@ export function agentRoutes(db: Db) {
     const keyId = req.params.keyId as string;
     const revoked = await svc.revokeKey(keyId);
     if (!revoked) {
-      res.status(404).json({ error: "Key not found" });
+      res.status(404).json({ error: "키를 찾을 수 없습니다" });
       return;
     }
     res.json({ ok: true });
@@ -1956,13 +1956,13 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, agent.companyId);
 
     if (req.actor.type === "agent" && req.actor.agentId !== id) {
-      res.status(403).json({ error: "Agent can only invoke itself" });
+      res.status(403).json({ error: "Agent는 자기 자신만 호출할 수 있습니다" });
       return;
     }
 
@@ -2006,13 +2006,13 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, agent.companyId);
 
     if (req.actor.type === "agent" && req.actor.agentId !== id) {
-      res.status(403).json({ error: "Agent can only invoke itself" });
+      res.status(403).json({ error: "Agent는 자기 자신만 호출할 수 있습니다" });
       return;
     }
 
@@ -2056,12 +2056,12 @@ export function agentRoutes(db: Db) {
     const id = req.params.id as string;
     const agent = await svc.getById(id);
     if (!agent) {
-      res.status(404).json({ error: "Agent not found" });
+      res.status(404).json({ error: "Agent를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, agent.companyId);
     if (agent.adapterType !== "claude_local") {
-      res.status(400).json({ error: "Login is only supported for claude_local agents" });
+      res.status(400).json({ error: "로그인은 claude_local Agent에서만 지원됩니다" });
       return;
     }
 
@@ -2152,7 +2152,7 @@ export function agentRoutes(db: Db) {
     const runId = req.params.runId as string;
     const run = await heartbeat.getRun(runId);
     if (!run) {
-      res.status(404).json({ error: "Heartbeat run not found" });
+      res.status(404).json({ error: "Heartbeat 실행을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, run.companyId);
@@ -2183,7 +2183,7 @@ export function agentRoutes(db: Db) {
     const runId = req.params.runId as string;
     const run = await heartbeat.getRun(runId);
     if (!run) {
-      res.status(404).json({ error: "Heartbeat run not found" });
+      res.status(404).json({ error: "Heartbeat 실행을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, run.companyId);
@@ -2205,7 +2205,7 @@ export function agentRoutes(db: Db) {
     const runId = req.params.runId as string;
     const run = await heartbeat.getRun(runId);
     if (!run) {
-      res.status(404).json({ error: "Heartbeat run not found" });
+      res.status(404).json({ error: "Heartbeat 실행을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, run.companyId);
@@ -2224,7 +2224,7 @@ export function agentRoutes(db: Db) {
     const runId = req.params.runId as string;
     const run = await heartbeat.getRun(runId);
     if (!run) {
-      res.status(404).json({ error: "Heartbeat run not found" });
+      res.status(404).json({ error: "Heartbeat 실행을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, run.companyId);
@@ -2239,7 +2239,7 @@ export function agentRoutes(db: Db) {
     const operationId = req.params.operationId as string;
     const operation = await workspaceOperations.getById(operationId);
     if (!operation) {
-      res.status(404).json({ error: "Workspace operation not found" });
+      res.status(404).json({ error: "Workspace 작업을 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, operation.companyId);
@@ -2260,7 +2260,7 @@ export function agentRoutes(db: Db) {
     const isIdentifier = /^[A-Z]+-\d+$/i.test(rawId);
     const issue = isIdentifier ? await issueSvc.getByIdentifier(rawId) : await issueSvc.getById(rawId);
     if (!issue) {
-      res.status(404).json({ error: "Issue not found" });
+      res.status(404).json({ error: "Issue를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, issue.companyId);
@@ -2298,7 +2298,7 @@ export function agentRoutes(db: Db) {
     const isIdentifier = /^[A-Z]+-\d+$/i.test(rawId);
     const issue = isIdentifier ? await issueSvc.getByIdentifier(rawId) : await issueSvc.getById(rawId);
     if (!issue) {
-      res.status(404).json({ error: "Issue not found" });
+      res.status(404).json({ error: "Issue를 찾을 수 없습니다" });
       return;
     }
     assertCompanyAccess(req, issue.companyId);

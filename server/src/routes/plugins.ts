@@ -486,7 +486,7 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!toolDeps) {
-      res.status(501).json({ error: "Plugin tool dispatch is not enabled" });
+      res.status(501).json({ error: "Plugin 도구 디스패치가 활성화되지 않았습니다" });
       return;
     }
 
@@ -520,13 +520,13 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!toolDeps) {
-      res.status(501).json({ error: "Plugin tool dispatch is not enabled" });
+      res.status(501).json({ error: "Plugin 도구 디스패치가 활성화되지 않았습니다" });
       return;
     }
 
     const body = (req.body as PluginToolExecuteRequest | undefined);
     if (!body) {
-      res.status(400).json({ error: "Request body is required" });
+      res.status(400).json({ error: "요청 본문이 필요합니다" });
       return;
     }
 
@@ -534,18 +534,18 @@ export function pluginRoutes(
 
     // Validate required fields
     if (!tool || typeof tool !== "string") {
-      res.status(400).json({ error: '"tool" is required and must be a string' });
+      res.status(400).json({ error: '"tool"은 필수이며 문자열이어야 합니다' });
       return;
     }
 
     if (!runContext || typeof runContext !== "object") {
-      res.status(400).json({ error: '"runContext" is required and must be an object' });
+      res.status(400).json({ error: '"runContext"는 필수이며 객체여야 합니다' });
       return;
     }
 
     if (!runContext.agentId || !runContext.runId || !runContext.companyId || !runContext.projectId) {
       res.status(400).json({
-        error: '"runContext" must include agentId, runId, companyId, and projectId',
+        error: '"runContext"에는 agentId, runId, companyId, projectId가 포함되어야 합니다',
       });
       return;
     }
@@ -555,7 +555,7 @@ export function pluginRoutes(
     // Verify the tool exists
     const registeredTool = toolDeps.toolDispatcher.getTool(tool);
     if (!registeredTool) {
-      res.status(404).json({ error: `Tool "${tool}" not found` });
+      res.status(404).json({ error: `도구 "${tool}"을(를) 찾을 수 없습니다` });
       return;
     }
 
@@ -606,30 +606,30 @@ export function pluginRoutes(
 
     // Input validation
     if (!packageName || typeof packageName !== "string") {
-      res.status(400).json({ error: "packageName is required and must be a string" });
+      res.status(400).json({ error: "packageName은 필수이며 문자열이어야 합니다" });
       return;
     }
 
     if (version !== undefined && typeof version !== "string") {
-      res.status(400).json({ error: "version must be a string if provided" });
+      res.status(400).json({ error: "version은 제공 시 문자열이어야 합니다" });
       return;
     }
 
     if (isLocalPath !== undefined && typeof isLocalPath !== "boolean") {
-      res.status(400).json({ error: "isLocalPath must be a boolean if provided" });
+      res.status(400).json({ error: "isLocalPath는 제공 시 불리언이어야 합니다" });
       return;
     }
 
     // Validate package name format
     const trimmedPackage = packageName.trim();
     if (trimmedPackage.length === 0) {
-      res.status(400).json({ error: "packageName cannot be empty" });
+      res.status(400).json({ error: "packageName은 비어 있을 수 없습니다" });
       return;
     }
 
     // Basic security check for package name (prevent injection)
     if (!isLocalPath && /[<>:"|?*]/.test(trimmedPackage)) {
-      res.status(400).json({ error: "packageName contains invalid characters" });
+      res.status(400).json({ error: "packageName에 잘못된 문자가 포함되어 있습니다" });
       return;
     }
 
@@ -641,7 +641,7 @@ export function pluginRoutes(
       const discovered = await loader.installPlugin(installOptions);
 
       if (!discovered.manifest) {
-        res.status(500).json({ error: "Plugin installed but manifest is missing" });
+        res.status(500).json({ error: "Plugin이 설치되었으나 매니페스트가 누락되었습니다" });
         return;
       }
 
@@ -661,7 +661,7 @@ export function pluginRoutes(
         res.json(updated);
       } else {
         // This shouldn't happen since installPlugin already registers in the DB
-        res.status(500).json({ error: "Plugin installed but not found in registry" });
+        res.status(500).json({ error: "Plugin이 설치되었으나 레지스트리에서 찾을 수 없습니다" });
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -796,7 +796,7 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!bridgeDeps) {
-      res.status(501).json({ error: "Plugin bridge is not enabled" });
+      res.status(501).json({ error: "Plugin 브릿지가 활성화되지 않았습니다" });
       return;
     }
 
@@ -805,7 +805,7 @@ export function pluginRoutes(
     // Resolve plugin
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -822,7 +822,7 @@ export function pluginRoutes(
     // Validate request body
     const body = req.body as PluginBridgeDataRequest | undefined;
     if (!body || !body.key || typeof body.key !== "string") {
-      res.status(400).json({ error: '"key" is required and must be a string' });
+      res.status(400).json({ error: '"key"는 필수이며 문자열이어야 합니다' });
       return;
     }
 
@@ -879,7 +879,7 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!bridgeDeps) {
-      res.status(501).json({ error: "Plugin bridge is not enabled" });
+      res.status(501).json({ error: "Plugin 브릿지가 활성화되지 않았습니다" });
       return;
     }
 
@@ -888,7 +888,7 @@ export function pluginRoutes(
     // Resolve plugin
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -905,7 +905,7 @@ export function pluginRoutes(
     // Validate request body
     const body = req.body as PluginBridgeActionRequest | undefined;
     if (!body || !body.key || typeof body.key !== "string") {
-      res.status(400).json({ error: '"key" is required and must be a string' });
+      res.status(400).json({ error: '"key"는 필수이며 문자열이어야 합니다' });
       return;
     }
 
@@ -963,7 +963,7 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!bridgeDeps) {
-      res.status(501).json({ error: "Plugin bridge is not enabled" });
+      res.status(501).json({ error: "Plugin 브릿지가 활성화되지 않았습니다" });
       return;
     }
 
@@ -972,7 +972,7 @@ export function pluginRoutes(
     // Resolve plugin
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1042,7 +1042,7 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!bridgeDeps) {
-      res.status(501).json({ error: "Plugin bridge is not enabled" });
+      res.status(501).json({ error: "Plugin 브릿지가 활성화되지 않았습니다" });
       return;
     }
 
@@ -1051,7 +1051,7 @@ export function pluginRoutes(
     // Resolve plugin
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1123,7 +1123,7 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!bridgeDeps?.streamBus) {
-      res.status(501).json({ error: "Plugin stream bridge is not enabled" });
+      res.status(501).json({ error: "Plugin 스트림 브릿지가 활성화되지 않았습니다" });
       return;
     }
 
@@ -1131,13 +1131,13 @@ export function pluginRoutes(
     const companyId = req.query.companyId as string | undefined;
 
     if (!companyId) {
-      res.status(400).json({ error: '"companyId" query parameter is required' });
+      res.status(400).json({ error: '"companyId" 쿼리 파라미터가 필요합니다' });
       return;
     }
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1202,7 +1202,7 @@ export function pluginRoutes(
     const { pluginId } = req.params;
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1234,7 +1234,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1269,7 +1269,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1309,7 +1309,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1348,7 +1348,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1416,7 +1416,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1468,7 +1468,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1515,7 +1515,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1545,13 +1545,13 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
     const body = req.body as { configJson?: Record<string, unknown> } | undefined;
     if (!body?.configJson || typeof body.configJson !== "object") {
-      res.status(400).json({ error: '"configJson" is required and must be an object' });
+      res.status(400).json({ error: '"configJson"은 필수이며 객체여야 합니다' });
       return;
     }
 
@@ -1648,7 +1648,7 @@ export function pluginRoutes(
     assertBoard(req);
 
     if (!bridgeDeps) {
-      res.status(501).json({ error: "Plugin bridge is not enabled" });
+      res.status(501).json({ error: "Plugin 브릿지가 활성화되지 않았습니다" });
       return;
     }
 
@@ -1656,7 +1656,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1669,7 +1669,7 @@ export function pluginRoutes(
 
     const body = req.body as { configJson?: Record<string, unknown> } | undefined;
     if (!body?.configJson || typeof body.configJson !== "object") {
-      res.status(400).json({ error: '"configJson" is required and must be an object' });
+      res.status(400).json({ error: '"configJson"은 필수이며 객체여야 합니다' });
       return;
     }
 
@@ -1744,14 +1744,14 @@ export function pluginRoutes(
   router.get("/plugins/:pluginId/jobs", async (req, res) => {
     assertBoard(req);
     if (!jobDeps) {
-      res.status(501).json({ error: "Job scheduling is not enabled" });
+      res.status(501).json({ error: "작업 스케줄링이 활성화되지 않았습니다" });
       return;
     }
 
     const { pluginId } = req.params;
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1790,26 +1790,26 @@ export function pluginRoutes(
   router.get("/plugins/:pluginId/jobs/:jobId/runs", async (req, res) => {
     assertBoard(req);
     if (!jobDeps) {
-      res.status(501).json({ error: "Job scheduling is not enabled" });
+      res.status(501).json({ error: "작업 스케줄링이 활성화되지 않았습니다" });
       return;
     }
 
     const { pluginId, jobId } = req.params;
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
     const job = await jobDeps.jobStore.getJobByIdForPlugin(plugin.id, jobId);
     if (!job) {
-      res.status(404).json({ error: "Job not found" });
+      res.status(404).json({ error: "작업을 찾을 수 없습니다" });
       return;
     }
 
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 25;
     if (isNaN(limit) || limit < 1 || limit > 500) {
-      res.status(400).json({ error: "limit must be a number between 1 and 500" });
+      res.status(400).json({ error: "limit는 1에서 500 사이의 숫자여야 합니다" });
       return;
     }
 
@@ -1838,20 +1838,20 @@ export function pluginRoutes(
   router.post("/plugins/:pluginId/jobs/:jobId/trigger", async (req, res) => {
     assertBoard(req);
     if (!jobDeps) {
-      res.status(501).json({ error: "Job scheduling is not enabled" });
+      res.status(501).json({ error: "작업 스케줄링이 활성화되지 않았습니다" });
       return;
     }
 
     const { pluginId, jobId } = req.params;
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
     const job = await jobDeps.jobStore.getJobByIdForPlugin(plugin.id, jobId);
     if (!job) {
-      res.status(404).json({ error: "Job not found" });
+      res.status(404).json({ error: "작업을 찾을 수 없습니다" });
       return;
     }
 
@@ -1894,7 +1894,7 @@ export function pluginRoutes(
    */
   router.post("/plugins/:pluginId/webhooks/:endpointKey", async (req, res) => {
     if (!webhookDeps) {
-      res.status(501).json({ error: "Webhook ingestion is not enabled" });
+      res.status(501).json({ error: "Webhook 수신이 활성화되지 않았습니다" });
       return;
     }
 
@@ -1903,7 +1903,7 @@ export function pluginRoutes(
     // Step 1: Resolve the plugin
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 
@@ -1918,7 +1918,7 @@ export function pluginRoutes(
     // Step 3: Validate the plugin has webhooks.receive capability
     const manifest = plugin.manifestJson;
     if (!manifest) {
-      res.status(400).json({ error: "Plugin manifest is missing" });
+      res.status(400).json({ error: "Plugin 매니페스트가 누락되었습니다" });
       return;
     }
 
@@ -2047,7 +2047,7 @@ export function pluginRoutes(
 
     const plugin = await resolvePlugin(registry, pluginId);
     if (!plugin) {
-      res.status(404).json({ error: "Plugin not found" });
+      res.status(404).json({ error: "Plugin을 찾을 수 없습니다" });
       return;
     }
 

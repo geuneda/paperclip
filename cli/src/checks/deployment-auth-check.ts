@@ -14,17 +14,17 @@ export function deploymentAuthCheck(config: PaperclipConfig): CheckResult {
   if (mode === "local_trusted") {
     if (!isLoopbackHost(config.server.host)) {
       return {
-        name: "Deployment/auth mode",
+        name: "배포/인증 모드",
         status: "fail",
-        message: `local_trusted requires loopback host binding (found ${config.server.host})`,
+        message: `local_trusted는 루프백 호스트 바인딩이 필요합니다 (현재 ${config.server.host})`,
         canRepair: false,
-        repairHint: "Run `paperclipai configure --section server` and set host to 127.0.0.1",
+        repairHint: "`paperclipai configure --section server`를 실행하고 호스트를 127.0.0.1로 설정하세요",
       };
     }
     return {
-      name: "Deployment/auth mode",
+      name: "배포/인증 모드",
       status: "pass",
-      message: "local_trusted mode is configured for loopback-only access",
+      message: "local_trusted 모드가 루프백 전용 접근으로 설정되었습니다",
     };
   }
 
@@ -33,59 +33,59 @@ export function deploymentAuthCheck(config: PaperclipConfig): CheckResult {
     process.env.PAPERCLIP_AGENT_JWT_SECRET?.trim();
   if (!secret) {
     return {
-      name: "Deployment/auth mode",
+      name: "배포/인증 모드",
       status: "fail",
-      message: "authenticated mode requires BETTER_AUTH_SECRET (or PAPERCLIP_AGENT_JWT_SECRET)",
+      message: "인증 모드에는 BETTER_AUTH_SECRET (또는 PAPERCLIP_AGENT_JWT_SECRET)이 필요합니다",
       canRepair: false,
-      repairHint: "Set BETTER_AUTH_SECRET before starting Paperclip",
+      repairHint: "Paperclip을 시작하기 전에 BETTER_AUTH_SECRET을 설정하세요",
     };
   }
 
   if (auth.baseUrlMode === "explicit" && !auth.publicBaseUrl) {
     return {
-      name: "Deployment/auth mode",
+      name: "배포/인증 모드",
       status: "fail",
-      message: "auth.baseUrlMode=explicit requires auth.publicBaseUrl",
+      message: "auth.baseUrlMode=explicit에는 auth.publicBaseUrl이 필요합니다",
       canRepair: false,
-      repairHint: "Run `paperclipai configure --section server` and provide a base URL",
+      repairHint: "`paperclipai configure --section server`를 실행하고 기본 URL을 입력하세요",
     };
   }
 
   if (exposure === "public") {
     if (auth.baseUrlMode !== "explicit" || !auth.publicBaseUrl) {
       return {
-        name: "Deployment/auth mode",
+        name: "배포/인증 모드",
         status: "fail",
-        message: "authenticated/public requires explicit auth.publicBaseUrl",
+        message: "authenticated/public에는 명시적인 auth.publicBaseUrl이 필요합니다",
         canRepair: false,
-        repairHint: "Run `paperclipai configure --section server` and select public exposure",
+        repairHint: "`paperclipai configure --section server`를 실행하고 공개 노출을 선택하세요",
       };
     }
     try {
       const url = new URL(auth.publicBaseUrl);
       if (url.protocol !== "https:") {
         return {
-          name: "Deployment/auth mode",
+          name: "배포/인증 모드",
           status: "warn",
-          message: "Public exposure should use an https:// auth.publicBaseUrl",
+          message: "공개 노출에는 https:// auth.publicBaseUrl을 사용해야 합니다",
           canRepair: false,
-          repairHint: "Use HTTPS in production for secure session cookies",
+          repairHint: "프로덕션에서 안전한 세션 쿠키를 위해 HTTPS를 사용하세요",
         };
       }
     } catch {
       return {
-        name: "Deployment/auth mode",
+        name: "배포/인증 모드",
         status: "fail",
-        message: "auth.publicBaseUrl is not a valid URL",
+        message: "auth.publicBaseUrl이 유효한 URL이 아닙니다",
         canRepair: false,
-        repairHint: "Run `paperclipai configure --section server` and provide a valid URL",
+        repairHint: "`paperclipai configure --section server`를 실행하고 유효한 URL을 입력하세요",
       };
     }
   }
 
   return {
-    name: "Deployment/auth mode",
+    name: "배포/인증 모드",
     status: "pass",
-    message: `Mode ${mode}/${exposure} with auth URL mode ${auth.baseUrlMode}`,
+    message: `모드 ${mode}/${exposure}, 인증 URL 모드 ${auth.baseUrlMode}`,
   };
 }

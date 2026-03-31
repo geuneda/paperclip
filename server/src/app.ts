@@ -107,7 +107,7 @@ export async function createApp(
   );
   app.get("/api/auth/get-session", (req, res) => {
     if (req.actor.type !== "board" || !req.actor.userId) {
-      res.status(401).json({ error: "Unauthorized" });
+      res.status(401).json({ error: "인증되지 않았습니다" });
       return;
     }
     res.json({

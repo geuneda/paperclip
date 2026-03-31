@@ -3,19 +3,19 @@ import type { LlmConfig } from "../config/schema.js";
 
 export async function promptLlm(): Promise<LlmConfig | undefined> {
   const configureLlm = await p.confirm({
-    message: "Configure an LLM provider now?",
+    message: "지금 LLM 제공자를 설정하시겠습니까?",
     initialValue: false,
   });
 
   if (p.isCancel(configureLlm)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   if (!configureLlm) return undefined;
 
   const provider = await p.select({
-    message: "LLM provider",
+    message: "LLM 제공자",
     options: [
       { value: "claude" as const, label: "Claude (Anthropic)" },
       { value: "openai" as const, label: "OpenAI" },
@@ -23,19 +23,19 @@ export async function promptLlm(): Promise<LlmConfig | undefined> {
   });
 
   if (p.isCancel(provider)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 
   const apiKey = await p.password({
-    message: `${provider === "claude" ? "Anthropic" : "OpenAI"} API key`,
+    message: `${provider === "claude" ? "Anthropic" : "OpenAI"} API 키`,
     validate: (val) => {
-      if (!val) return "API key is required";
+      if (!val) return "API 키는 필수입니다";
     },
   });
 
   if (p.isCancel(apiKey)) {
-    p.cancel("Setup cancelled.");
+    p.cancel("설정이 취소되었습니다.");
     process.exit(0);
   }
 

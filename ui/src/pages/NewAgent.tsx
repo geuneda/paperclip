@@ -138,7 +138,7 @@ export function NewAgent() {
       navigate(agentUrl(result.agent));
     },
     onError: (error) => {
-      setFormError(error instanceof Error ? error.message : "Failed to create agent");
+      setFormError(error instanceof Error ? error.message : "Agent 생성에 실패했습니다");
     },
   });
 
@@ -153,7 +153,7 @@ export function NewAgent() {
     if (configValues.adapterType === "opencode_local") {
       const selectedModel = configValues.model.trim();
       if (!selectedModel) {
-        setFormError("OpenCode requires an explicit model in provider/model format.");
+        setFormError("OpenCode는 공급자/모델 형식의 명시적 모델이 필요합니다.");
         return;
       }
       if (adapterModelsError) {
@@ -165,15 +165,15 @@ export function NewAgent() {
         return;
       }
       if (adapterModelsLoading || adapterModelsFetching) {
-        setFormError("OpenCode models are still loading. Please wait and try again.");
+        setFormError("OpenCode 모델을 불러오는 중입니다. 잠시 후 다시 시도하세요.");
         return;
       }
       const discovered = adapterModels ?? [];
       if (!discovered.some((entry) => entry.id === selectedModel)) {
         setFormError(
           discovered.length === 0
-            ? "No OpenCode models discovered. Run `opencode models` and authenticate providers."
-            : `Configured OpenCode model is unavailable: ${selectedModel}`,
+            ? "검색된 OpenCode 모델이 없습니다. `opencode models`를 실행하고 공급자를 인증하세요."
+            : `설정된 OpenCode 모델을 사용할 수 없습니다: ${selectedModel}`,
         );
         return;
       }
@@ -213,9 +213,9 @@ export function NewAgent() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">New Agent</h1>
+        <h1 className="text-lg font-semibold">새 Agent</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Advanced agent configuration
+          고급 Agent 설정
         </p>
       </div>
 
@@ -224,7 +224,7 @@ export function NewAgent() {
         <div className="px-4 pt-4 pb-2">
           <input
             className="w-full text-lg font-semibold bg-transparent outline-none placeholder:text-muted-foreground/50"
-            placeholder="Agent name"
+            placeholder="Agent 이름"
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoFocus
@@ -235,7 +235,7 @@ export function NewAgent() {
         <div className="px-4 pb-2">
           <input
             className="w-full bg-transparent outline-none text-sm text-muted-foreground placeholder:text-muted-foreground/40"
-            placeholder="Title (e.g. VP of Engineering)"
+            placeholder="직함 (예: 엔지니어링 VP)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
@@ -291,14 +291,14 @@ export function NewAgent() {
         <div className="border-t border-border px-4 py-4">
           <div className="space-y-3">
             <div>
-              <h2 className="text-sm font-medium">Company skills</h2>
+              <h2 className="text-sm font-medium">회사 Skills</h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                Optional skills from the company library. Built-in Paperclip runtime skills are added automatically.
+                회사 라이브러리의 선택적 Skills입니다. 기본 Paperclip 런타임 Skills는 자동으로 추가됩니다.
               </p>
             </div>
             {availableSkills.length === 0 ? (
               <p className="text-xs text-muted-foreground">
-                No optional company skills installed yet.
+                설치된 선택적 회사 Skills가 없습니다.
               </p>
             ) : (
               <div className="space-y-3">
@@ -329,21 +329,21 @@ export function NewAgent() {
         {/* Footer */}
         <div className="border-t border-border px-4 py-3">
           {isFirstAgent && (
-            <p className="text-xs text-muted-foreground mb-2">This will be the CEO</p>
+            <p className="text-xs text-muted-foreground mb-2">이 Agent가 CEO가 됩니다</p>
           )}
           {formError && (
             <p className="text-xs text-destructive mb-2">{formError}</p>
           )}
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => navigate("/agents")}>
-              Cancel
+              취소
             </Button>
             <Button
               size="sm"
               disabled={!name.trim() || createAgent.isPending}
               onClick={handleSubmit}
             >
-              {createAgent.isPending ? "Creating…" : "Create agent"}
+              {createAgent.isPending ? "생성 중…" : "Agent 생성"}
             </Button>
           </div>
         </div>

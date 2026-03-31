@@ -78,7 +78,7 @@ export function ApprovalCard({
             onClick={onApprove}
             disabled={isPending}
           >
-            Approve
+            승인
           </Button>
           <Button
             variant="destructive"
@@ -86,7 +86,7 @@ export function ApprovalCard({
             onClick={onReject}
             disabled={isPending}
           >
-            Reject
+            거부
           </Button>
         </div>
       )}
