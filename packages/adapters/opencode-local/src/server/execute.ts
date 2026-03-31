@@ -95,7 +95,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
 
   const promptTemplate = asString(
     config.promptTemplate,
-    "You are agent {{agent.id}} ({{agent.name}}). Continue your Paperclip work.",
+    "당신은 Agent {{agent.id}} ({{agent.name}})입니다. Paperclip 작업을 계속 진행하세요.",
   );
   const command = asString(config.command, "opencode");
   const model = asString(config.model, "").trim();

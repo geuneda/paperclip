@@ -111,7 +111,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
 
   const promptTemplate = asString(
     config.promptTemplate,
-    "You are agent {{agent.id}} ({{agent.name}}). Continue your Paperclip work.",
+    "당신은 Agent {{agent.id}} ({{agent.name}})입니다. Paperclip 작업을 계속 진행하세요.",
   );
   const command = asString(config.command, "pi");
   const model = asString(config.model, "").trim();
@@ -270,9 +270,9 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       const instructionsContents = await fs.readFile(resolvedInstructionsFilePath, "utf8");
       systemPromptExtension =
         `${instructionsContents}\n\n` +
-        `The above agent instructions were loaded from ${resolvedInstructionsFilePath}. ` +
-        `Resolve any relative file references from ${instructionsFileDir}.\n\n` +
-        `You are agent {{agent.id}} ({{agent.name}}). Continue your Paperclip work.`;
+        `위 Agent 지시사항은 ${resolvedInstructionsFilePath}에서 불러왔습니다. ` +
+        `상대 경로 참조는 ${instructionsFileDir} 기준으로 해석하세요.\n\n` +
+        `당신은 Agent {{agent.id}} ({{agent.name}})입니다. Paperclip 작업을 계속 진행하세요.`;
     } catch (err) {
       instructionsReadFailed = true;
       const reason = err instanceof Error ? err.message : String(err);
