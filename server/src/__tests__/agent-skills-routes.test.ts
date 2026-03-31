@@ -368,10 +368,10 @@ describe("agent skill routes", () => {
         adapterType: "claude_local",
       }),
       expect.objectContaining({
-        "AGENTS.md": expect.stringContaining("You are the CEO."),
-        "HEARTBEAT.md": expect.stringContaining("CEO Heartbeat Checklist"),
-        "SOUL.md": expect.stringContaining("CEO Persona"),
-        "TOOLS.md": expect.stringContaining("# Tools"),
+        "AGENTS.md": expect.stringContaining("당신은 CEO입니다."),
+        "HEARTBEAT.md": expect.stringContaining("CEO Heartbeat 체크리스트"),
+        "SOUL.md": expect.stringContaining("CEO 페르소나"),
+        "TOOLS.md": expect.stringContaining("# 도구"),
       }),
       { entryFile: "AGENTS.md", replaceExisting: false },
     );
@@ -395,7 +395,7 @@ describe("agent skill routes", () => {
         adapterType: "claude_local",
       }),
       expect.objectContaining({
-        "AGENTS.md": expect.stringContaining("Keep the work moving until it's done."),
+        "AGENTS.md": expect.stringContaining("작업이 완료될 때까지 계속 진행하세요."),
       }),
       { entryFile: "AGENTS.md", replaceExisting: false },
     );

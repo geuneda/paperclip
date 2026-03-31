@@ -169,7 +169,7 @@ describe("LiveUpdatesProvider run lifecycle toasts", () => {
         "company-1",
       ),
     ).toMatchObject({
-      title: "CodexCoder errored",
+      title: "CodexCoder에 오류가 발생했습니다",
       body: "Software Engineer",
       tone: "error",
     });
@@ -185,7 +185,7 @@ describe("LiveUpdatesProvider run lifecycle toasts", () => {
         () => "CodexCoder",
       ),
     ).toMatchObject({
-      title: "CodexCoder run failed",
+      title: "CodexCoder 실행이 실패했습니다",
       body: "boom",
       tone: "error",
     });

@@ -219,7 +219,7 @@ describe("POST /api/companies/:companyId/logo", () => {
       .attach("file", file, "too-large.png");
 
     expect(res.status).toBe(422);
-    expect(res.body.error).toBe(`Image exceeds ${MAX_ATTACHMENT_BYTES} bytes`);
+    expect(res.body.error).toBe(`이미지가 ${MAX_ATTACHMENT_BYTES} 바이트를 초과합니다`);
   });
 
   it("rejects unsupported image types", async () => {
@@ -231,7 +231,7 @@ describe("POST /api/companies/:companyId/logo", () => {
       .attach("file", Buffer.from("not an image"), "note.txt");
 
     expect(res.status).toBe(422);
-    expect(res.body.error).toBe("Unsupported image type: text/plain");
+    expect(res.body.error).toBe("지원하지 않는 이미지 유형입니다: text/plain");
     expect(createAssetMock).not.toHaveBeenCalled();
   });
 
@@ -244,7 +244,7 @@ describe("POST /api/companies/:companyId/logo", () => {
       .attach("file", Buffer.from("not actually svg"), "logo.svg");
 
     expect(res.status).toBe(422);
-    expect(res.body.error).toBe("SVG could not be sanitized");
+    expect(res.body.error).toBe("SVG를 살균할 수 없습니다");
     expect(createAssetMock).not.toHaveBeenCalled();
   });
 });

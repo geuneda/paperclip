@@ -225,6 +225,6 @@ describe("POST /companies/:companyId/openclaw/invite-prompt", () => {
       .send({});
 
     expect(res.status).toBe(403);
-    expect(res.body.error).toBe("Permission denied");
+    expect(res.body.error).toBe("권한이 거부되었습니다");
   });
 });

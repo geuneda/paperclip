@@ -43,7 +43,9 @@ import {
   Building2,
   Bot,
   Code,
+  FolderOpen,
   Gem,
+  GitBranch,
   ListTodo,
   Rocket,
   ArrowLeft,
@@ -54,11 +56,12 @@ import {
   Check,
   Loader2,
   ChevronDown,
+  FolderSearch,
   X
 } from "lucide-react";
 import { HermesIcon } from "./HermesIcon";
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 type AdapterType =
   | "claude_local"
   | "codex_local"
@@ -70,11 +73,17 @@ type AdapterType =
   | "http"
   | "openclaw_gateway";
 
-const DEFAULT_TASK_DESCRIPTION = `You are the CEO. You set the direction for the company.
+const DEFAULT_TASK_DESCRIPTION_NEW = `당신은 CEO입니다. 회사의 방향을 설정합니다.
 
-- hire a founding engineer
-- write a hiring plan
-- break the roadmap into concrete tasks and start delegating work`;
+- 첫 번째 엔지니어 채용
+- 채용 계획 작성
+- 로드맵을 구체적인 작업으로 분해하고 위임 시작`;
+
+const DEFAULT_TASK_DESCRIPTION_EXISTING = `당신은 CEO입니다. 기존 프로젝트의 개발을 이끕니다.
+
+- 코드베이스 구조와 기술 스택 분석
+- 주요 개선 사항 및 기술 부채 파악
+- 개발 계획 수립 및 작업 분배`;
 
 export function OnboardingWizard() {
   const { onboardingOpen, onboardingOptions, closeOnboarding } = useDialog();
@@ -112,7 +121,16 @@ export function OnboardingWizard() {
   const [companyName, setCompanyName] = useState("");
   const [companyGoal, setCompanyGoal] = useState("");
 
-  // Step 2
+  // Step 2 - Project Source
+  const [projectSourceType, setProjectSourceType] = useState<"new" | "local_path" | "git_repo">("new");
+  const [projectPath, setProjectPath] = useState("");
+  const [projectRepoUrl, setProjectRepoUrl] = useState("");
+  const [projectRepoRef, setProjectRepoRef] = useState("main");
+
+  // Track whether user has manually edited task fields
+  const [taskManuallyEdited, setTaskManuallyEdited] = useState(false);
+
+  // Step 3
   const [agentName, setAgentName] = useState("CEO");
   const [adapterType, setAdapterType] = useState<AdapterType>("claude_local");
   const [model, setModel] = useState("");
@@ -128,12 +146,12 @@ export function OnboardingWizard() {
   const [unsetAnthropicLoading, setUnsetAnthropicLoading] = useState(false);
   const [showMoreAdapters, setShowMoreAdapters] = useState(false);
 
-  // Step 3
+  // Step 4
   const [taskTitle, setTaskTitle] = useState(
-    "Hire your first engineer and create a hiring plan"
+    "첫 엔지니어 채용 및 채용 계획 수립"
   );
   const [taskDescription, setTaskDescription] = useState(
-    DEFAULT_TASK_DESCRIPTION
+    DEFAULT_TASK_DESCRIPTION_NEW
   );
 
   // Auto-grow textarea for task description
@@ -189,10 +207,22 @@ export function OnboardingWizard() {
     if (company) setCreatedCompanyPrefix(company.issuePrefix);
   }, [effectiveOnboardingOpen, createdCompanyId, createdCompanyPrefix, companies]);
 
-  // Resize textarea when step 3 is shown or description changes
+  // Resize textarea when step 4 is shown or description changes
   useEffect(() => {
-    if (step === 3) autoResizeTextarea();
+    if (step === 4) autoResizeTextarea();
   }, [step, taskDescription, autoResizeTextarea]);
+
+  // Update default task title/description when projectSourceType changes
+  useEffect(() => {
+    if (taskManuallyEdited) return;
+    if (projectSourceType === "new") {
+      setTaskTitle("첫 엔지니어 채용 및 채용 계획 수립");
+      setTaskDescription(DEFAULT_TASK_DESCRIPTION_NEW);
+    } else {
+      setTaskTitle("코드베이스 분석 및 개발 계획 수립");
+      setTaskDescription(DEFAULT_TASK_DESCRIPTION_EXISTING);
+    }
+  }, [projectSourceType, taskManuallyEdited]);
 
   const {
     data: adapterModels,
@@ -204,7 +234,7 @@ export function OnboardingWizard() {
       ? queryKeys.agents.adapterModels(createdCompanyId, adapterType)
       : ["agents", "none", "adapter-models", adapterType],
     queryFn: () => agentsApi.adapterModels(createdCompanyId!, adapterType),
-    enabled: Boolean(createdCompanyId) && effectiveOnboardingOpen && step === 2
+    enabled: Boolean(createdCompanyId) && effectiveOnboardingOpen && step === 3
   });
   const isLocalAdapter =
     adapterType === "claude_local" ||
@@ -231,7 +261,7 @@ export function OnboardingWizard() {
       : "claude");
 
   useEffect(() => {
-    if (step !== 2) return;
+    if (step !== 3) return;
     setAdapterEnvResult(null);
     setAdapterEnvError(null);
   }, [step, adapterType, model, command, args, url]);
@@ -299,8 +329,13 @@ export function OnboardingWizard() {
     setAdapterEnvLoading(false);
     setForceUnsetAnthropicApiKey(false);
     setUnsetAnthropicLoading(false);
-    setTaskTitle("Hire your first engineer and create a hiring plan");
-    setTaskDescription(DEFAULT_TASK_DESCRIPTION);
+    setProjectSourceType("new");
+    setProjectPath("");
+    setProjectRepoUrl("");
+    setProjectRepoRef("main");
+    setTaskManuallyEdited(false);
+    setTaskTitle("첫 엔지니어 채용 및 채용 계획 수립");
+    setTaskDescription(DEFAULT_TASK_DESCRIPTION_NEW);
     setCreatedCompanyId(null);
     setCreatedCompanyPrefix(null);
     setCreatedCompanyGoalId(null);
@@ -418,6 +453,23 @@ export function OnboardingWizard() {
   }
 
   async function handleStep2Next() {
+    if (projectSourceType === "new") {
+      setStep(3);
+      return;
+    }
+    if (projectSourceType === "local_path" && !projectPath.trim()) {
+      setError("프로젝트 경로를 입력하세요.");
+      return;
+    }
+    if (projectSourceType === "git_repo" && !projectRepoUrl.trim()) {
+      setError("Git 저장소 URL을 입력하세요.");
+      return;
+    }
+    setError(null);
+    setStep(3);
+  }
+
+  async function handleStep3Next() {
     if (!createdCompanyId) return;
     setLoading(true);
     setError(null);
@@ -479,7 +531,7 @@ export function OnboardingWizard() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.agents.list(createdCompanyId)
       });
-      setStep(3);
+      setStep(4);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Agent 생성에 실패했습니다");
     } finally {
@@ -536,10 +588,10 @@ export function OnboardingWizard() {
     }
   }
 
-  async function handleStep3Next() {
+  async function handleStep4Next() {
     if (!createdCompanyId || !createdAgentId) return;
     setError(null);
-    setStep(4);
+    setStep(5);
   }
 
   async function handleLaunch() {
@@ -565,6 +617,17 @@ export function OnboardingWizard() {
         queryClient.invalidateQueries({
           queryKey: queryKeys.projects.list(createdCompanyId)
         });
+      }
+
+      // Create workspace if connecting an existing project
+      if (projectSourceType !== "new" && projectId) {
+        const workspacePayload: Record<string, unknown> = {
+          isPrimary: true,
+          ...(projectSourceType === "local_path"
+            ? { sourceType: "local_path", cwd: projectPath.trim() }
+            : { sourceType: "git_repo", repoUrl: projectRepoUrl.trim(), repoRef: projectRepoRef.trim() || "main" }),
+        };
+        await projectsApi.createWorkspace(projectId, workspacePayload, createdCompanyId);
       }
 
       let issueRef = createdIssueRef;
@@ -605,9 +668,10 @@ export function OnboardingWizard() {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       if (step === 1 && companyName.trim()) handleStep1Next();
-      else if (step === 2 && agentName.trim()) handleStep2Next();
-      else if (step === 3 && taskTitle.trim()) handleStep3Next();
-      else if (step === 4) handleLaunch();
+      else if (step === 2) handleStep2Next();
+      else if (step === 3 && agentName.trim()) handleStep3Next();
+      else if (step === 4 && taskTitle.trim()) handleStep4Next();
+      else if (step === 5) handleLaunch();
     }
   }
 
@@ -651,9 +715,10 @@ export function OnboardingWizard() {
                 {(
                   [
                     { step: 1 as Step, label: "회사", icon: Building2 },
-                    { step: 2 as Step, label: "Agent", icon: Bot },
-                    { step: 3 as Step, label: "작업", icon: ListTodo },
-                    { step: 4 as Step, label: "시작", icon: Rocket }
+                    { step: 2 as Step, label: "Project", icon: FolderSearch },
+                    { step: 3 as Step, label: "Agent", icon: Bot },
+                    { step: 4 as Step, label: "작업", icon: ListTodo },
+                    { step: 5 as Step, label: "시작", icon: Rocket }
                   ] as const
                 ).map(({ step: s, label, icon: Icon }) => (
                   <button
@@ -728,6 +793,109 @@ export function OnboardingWizard() {
               )}
 
               {step === 2 && (
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="bg-muted/50 p-2">
+                      <FolderSearch className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium">Project 소스 선택</h3>
+                      <p className="text-xs text-muted-foreground">
+                        새 프로젝트를 시작하거나, 기존 코드베이스를 연결하세요.
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground mb-2 block">
+                      소스 유형
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        {
+                          value: "new" as const,
+                          label: "새로 시작",
+                          icon: Rocket,
+                          desc: "처음부터 새 프로젝트를 시작합니다"
+                        },
+                        {
+                          value: "local_path" as const,
+                          label: "로컬 프로젝트",
+                          icon: FolderOpen,
+                          desc: "기존 로컬 폴더를 연결합니다"
+                        },
+                        {
+                          value: "git_repo" as const,
+                          label: "Git 저장소",
+                          icon: GitBranch,
+                          desc: "원격 Git 저장소를 연결합니다"
+                        }
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          className={cn(
+                            "flex flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors",
+                            projectSourceType === opt.value
+                              ? "border-foreground bg-accent"
+                              : "border-border hover:bg-accent/50"
+                          )}
+                          onClick={() => setProjectSourceType(opt.value)}
+                        >
+                          <opt.icon className="h-4 w-4" />
+                          <span className="font-medium">{opt.label}</span>
+                          <span className="text-muted-foreground text-[10px] text-center">
+                            {opt.desc}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {projectSourceType === "local_path" && (
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">
+                        프로젝트 경로
+                      </label>
+                      <input
+                        className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm font-mono outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
+                        placeholder="/home/user/my-project"
+                        value={projectPath}
+                        onChange={(e) => setProjectPath(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
+                  )}
+
+                  {projectSourceType === "git_repo" && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">
+                          Git 저장소 URL
+                        </label>
+                        <input
+                          className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm font-mono outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
+                          placeholder="https://github.com/user/repo.git"
+                          value={projectRepoUrl}
+                          onChange={(e) => setProjectRepoUrl(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">
+                          Branch / Ref
+                        </label>
+                        <input
+                          className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
+                          placeholder="main"
+                          value={projectRepoRef}
+                          onChange={(e) => setProjectRepoRef(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {step === 3 && (
                 <div className="space-y-5">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
@@ -1159,7 +1327,7 @@ export function OnboardingWizard() {
                 </div>
               )}
 
-              {step === 3 && (
+              {step === 4 && (
                 <div className="space-y-5">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
@@ -1181,7 +1349,10 @@ export function OnboardingWizard() {
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                       placeholder="예: 경쟁사 가격 조사"
                       value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
+                      onChange={(e) => {
+                        setTaskTitle(e.target.value);
+                        setTaskManuallyEdited(true);
+                      }}
                       autoFocus
                     />
                   </div>
@@ -1194,13 +1365,16 @@ export function OnboardingWizard() {
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[120px] max-h-[300px] overflow-y-auto"
                       placeholder="Agent가 수행할 작업에 대한 세부 사항을 추가하세요..."
                       value={taskDescription}
-                      onChange={(e) => setTaskDescription(e.target.value)}
+                      onChange={(e) => {
+                        setTaskDescription(e.target.value);
+                        setTaskManuallyEdited(true);
+                      }}
                     />
                   </div>
                 </div>
               )}
 
-              {step === 4 && (
+              {step === 5 && (
                 <div className="space-y-5">
                   <div className="flex items-center gap-3 mb-1">
                     <div className="bg-muted/50 p-2">
@@ -1225,6 +1399,28 @@ export function OnboardingWizard() {
                       </div>
                       <Check className="h-4 w-4 text-green-500 shrink-0" />
                     </div>
+                    {projectSourceType !== "new" && (
+                      <div className="flex items-center gap-3 px-3 py-2.5">
+                        {projectSourceType === "local_path" ? (
+                          <FolderOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                        ) : (
+                          <GitBranch className="h-4 w-4 text-muted-foreground shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {projectSourceType === "local_path"
+                              ? projectPath
+                              : projectRepoUrl}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {projectSourceType === "local_path"
+                              ? "로컬 프로젝트"
+                              : `Git 저장소 (${projectRepoRef})`}
+                          </p>
+                        </div>
+                        <Check className="h-4 w-4 text-green-500 shrink-0" />
+                      </div>
+                    )}
                     <div className="flex items-center gap-3 px-3 py-2.5">
                       <Bot className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -1291,23 +1487,19 @@ export function OnboardingWizard() {
                   {step === 2 && (
                     <Button
                       size="sm"
-                      disabled={
-                        !agentName.trim() || loading || adapterEnvLoading
-                      }
+                      disabled={loading}
                       onClick={handleStep2Next}
                     >
-                      {loading ? (
-                        <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                      ) : (
-                        <ArrowRight className="h-3.5 w-3.5 mr-1" />
-                      )}
-                      {loading ? "생성 중..." : "다음"}
+                      <ArrowRight className="h-3.5 w-3.5 mr-1" />
+                      다음
                     </Button>
                   )}
                   {step === 3 && (
                     <Button
                       size="sm"
-                      disabled={!taskTitle.trim() || loading}
+                      disabled={
+                        !agentName.trim() || loading || adapterEnvLoading
+                      }
                       onClick={handleStep3Next}
                     >
                       {loading ? (
@@ -1319,6 +1511,20 @@ export function OnboardingWizard() {
                     </Button>
                   )}
                   {step === 4 && (
+                    <Button
+                      size="sm"
+                      disabled={!taskTitle.trim() || loading}
+                      onClick={handleStep4Next}
+                    >
+                      {loading ? (
+                        <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                      ) : (
+                        <ArrowRight className="h-3.5 w-3.5 mr-1" />
+                      )}
+                      {loading ? "생성 중..." : "다음"}
+                    </Button>
+                  )}
+                  {step === 5 && (
                     <Button size="sm" disabled={loading} onClick={handleLaunch}>
                       {loading ? (
                         <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
